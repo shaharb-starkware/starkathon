@@ -107,8 +107,21 @@ export const SomeComponent = () => {
 ```tsx
 import React from 'react';
 import { ConnectWalletButton } from '@/components/ConnectWalletButton/ConnectWalletButton';
+import {useAccount, useDisconnect} from '@starknet-react/core';
 
 export const SomeComponent = () => {
+  const {isConnected, address} = useAccount();
+  const { disconnect } = useDisconnect();
+
+  if (isConnected) {
+    return (
+      <div>
+        <button onClick={disconnect}>disconnect</div>
+        <div>{address}</div>
+      </div>
+    );
+  }
+  
   return <ConnectWalletButton />
 };
 ```
