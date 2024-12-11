@@ -57,10 +57,11 @@ pub mod Starkwars {
 
     #[constructor]
     fn constructor(ref self: ContractState) {
-        self.char_next_id.write(1);
+        self.char_next_id.write(0);
         self.scenario_next_id.write(0);
         self.ownable.initializer(get_caller_address());
-
+        let char_id = self.create_character("Default", array![4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5]);
+        self.challanger.write(Option::Some(char_id));
     }
 
     fn validate_stats(stats: Span<u32>) {
@@ -133,7 +134,7 @@ pub mod Starkwars {
             0
         }
     }
-    
+
 
     #[abi(embed_v0)]
     impl WorldStateImpl of WorldStateTrait<ContractState> {
@@ -173,7 +174,7 @@ pub mod Starkwars {
             else {
                 let winner_char_id = self.duel(self.challanger.read().unwrap(), char_id);
                 if winner_char_id != 0 {
-                    self.challanger.write(Option::Some(winner_char_id)); 
+                    self.challanger.write(Option::Some(winner_char_id));
                 }
             }
 
