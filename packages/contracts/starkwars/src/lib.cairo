@@ -1,7 +1,8 @@
 mod starkwars;
 mod character;
 mod scenario;
-
+mod constants;
+mod types;
 // /// Interface representing `HelloContract`.
 // /// This interface allows modification and retrieval of the contract balance.
 // #[starknet::interface]
@@ -34,3 +35,4 @@ mod scenario;
 //         }
 //     }
 // }
+
