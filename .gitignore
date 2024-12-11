@@ -5,3 +5,4 @@ node_modules
 packages/contracts/event_manager/target/
 .spr.yml
 packages/contracts/starkwars/target/
+target/dev/starkwars_StarkWars.contract_class.json

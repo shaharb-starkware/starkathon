@@ -4,9 +4,8 @@ pub struct Scenario {
     pub stat1: u64,
     pub min_value1: u32,
     pub stat2: u64,
-    pub min_value2: u32
+    pub min_value2: u32,
 }
-
 // impl ScenarioZero of core::num::traits::Zero<Scenario> {
 //     fn zero() -> Scenario nopanic {
 //         Scenario { name: "", required_stat: 0, min_value: 0, id: 0 }
@@ -18,3 +17,4 @@ pub struct Scenario {
 //         self.id.is_non_zero()
 //     }
 // }
+

@@ -1,25 +1,16 @@
 #[starknet::contract]
-pub mod Starkwars {
+pub mod StarkWars {
+    use core::hash::{HashStateTrait};
     use core::num::traits::Pow;
-    use starknet::storage::MutableVecTrait;
-    use starknet::storage::VecTrait;
-    use starknet::storage::StoragePathEntry;
-    use crate::scenario::Scenario;
+    use core::poseidon::{HashState, PoseidonTrait};
+    use core::starknet::{ContractAddress, get_caller_address};
     use core::starknet::storage::{Map, Vec};
     use crate::character::Character;
-    use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
-    use core::starknet::{ContractAddress, get_caller_address};
+    use crate::constants::{STAT_SUM, SEGMENTS, MAX_SCENARIOS, LIVES, MIN_STAT_VALUE, MAX_STAT_VALUE};
+    use crate::scenario::Scenario;
+    use crate::types::{CharId, ScenarioId};
+    use starknet::storage::{MutableVecTrait, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess, VecTrait};
     use openzeppelin_access::ownable::OwnableComponent;
-    use core::poseidon::{HashState, PoseidonTrait};
-    use core::hash::{HashStateTrait};
-
-    const STAT_SUM: u32 = 45;
-    const LIVES: u32 = 2;
-    const MAX_SCENARIOS: u32 = 4;
-    const SEGMENTS: u32 = 256 / MAX_SCENARIOS;
-
-    type CharId = u32;
-    type ScenarioId = u32;
 
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
 
@@ -31,8 +22,8 @@ pub mod Starkwars {
     struct Storage {
         scenarios: Map<ScenarioId, Scenario>, // TODO consider change to Vec
         characters: Map<CharId, Character>,
-        owners: Map<CharId, ContractAddress>,
-        owner_to_characters: Map<ContractAddress, Vec<CharId>>,
+        character_to_owner: Map<CharId, ContractAddress>,
+        owner_to_character: Map<ContractAddress, Vec<CharId>>,
         challanger: Option<CharId>,
         char_next_id: CharId,
         scenario_next_id: ScenarioId,
@@ -47,12 +38,12 @@ pub mod Starkwars {
     }
 
     #[starknet::interface]
-    pub trait WorldStateTrait<TState> {
-        fn create_character(ref self: TState, name: felt252, stats: Array<u32>) -> CharId;
+    pub trait StarkWarsTrait<TState> {
+        fn create_character(ref self: TState, name: ByteArray, stats: Array<u32>) -> CharId;
         fn add_scenario(ref self: TState, scenario: Scenario) -> ScenarioId;
         fn play(ref self: TState, char_id: CharId);
-        fn get_my_characters(self: @TState) -> Array<(CharId, felt252, Array<u32>)>;
-        fn get_challenger(self: @TState) -> Option<(CharId, felt252, Array<u32>)>;
+        fn get_my_characters(self: @TState) -> Array<(CharId, ByteArray, Array<u32>)>;
+        fn get_challenger(self: @TState) -> Option<(CharId, ByteArray, Array<u32>)>;
     }
 
     #[constructor]
@@ -60,16 +51,15 @@ pub mod Starkwars {
         self.char_next_id.write(1);
         self.scenario_next_id.write(0);
         self.ownable.initializer(get_caller_address());
-
     }
 
     fn validate_stats(stats: Span<u32>) {
         let mut sum = 0;
         for stat in stats {
-            assert!(*stat <= 9 && *stat >= 0, "stat must be between 0 and 9");
+            assert!(*stat <= MAX_STAT_VALUE && *stat >= MIN_STAT_VALUE, "stat value must be between {} and {}", MIN_STAT_VALUE, MAX_STAT_VALUE);
             sum = sum + *stat;
         };
-        assert!(sum == STAT_SUM, "sum of stats must be 45");
+        assert!(sum == STAT_SUM, "sum of stat's values must be {}", STAT_SUM);
     }
 
     fn contain(vec: Span<u64>, target: u64) -> bool {
@@ -89,7 +79,7 @@ pub mod Starkwars {
         hash_state = hash_state.update(starknet::get_block_timestamp().into());
         let mut timestamp_hash: u256 = hash_state.finalize().into();
         for _ in 0..MAX_SCENARIOS {
-            let next_random : u64 = (timestamp_hash % 2_u256.pow(SEGMENTS)).try_into().unwrap();
+            let next_random: u64 = (timestamp_hash % 2_u256.pow(SEGMENTS)).try_into().unwrap();
             let mut random_index = next_random % len;
             while contain(random_indices.span(), random_index) {
                 random_index += 1 % len;
@@ -102,7 +92,7 @@ pub mod Starkwars {
 
     #[generate_trait]
     impl InternalImpl of InternalTrait {
-        fn duel(ref self: ContractState, char_id1: CharId, char_id2: CharId) -> CharId {
+        fn duel(ref self: ContractState, char_id1: CharId, char_id2: CharId, random_threshold: bool) -> CharId {
             let random_indices = get_randomness(len: self.scenario_next_id.read().into());
             let mut lives1 = LIVES;
             let mut lives2 = LIVES;
@@ -114,10 +104,15 @@ pub mod Starkwars {
                 let stat2 = scenario.stat2;
                 let stat2_char1 = self.characters.entry(char_id1).stats[stat2].read();
                 let stat2_char2 = self.characters.entry(char_id2).stats[stat2].read();
-                if stat1_char1 < scenario.min_value1 && stat2_char1 < scenario.min_value2 {
+                let min_val1 = scenario.min_value1;
+                let min_val2 = scenario.min_value2;
+                if random_threshold {
+
+                }
+                if stat1_char1 < min_val1 && stat2_char1 < min_val2 {
                     lives1 -= 1;
                 }
-                if stat1_char2 < scenario.min_value1 && stat2_char2 < scenario.min_value2 {
+                if stat1_char2 < min_val1 && stat2_char2 < min_val2 {
                     lives2 -= 1;
                 }
                 if lives1 == 0 || lives2 == 0 {
@@ -133,20 +128,19 @@ pub mod Starkwars {
             0
         }
     }
-    
 
     #[abi(embed_v0)]
-    impl WorldStateImpl of WorldStateTrait<ContractState> {
-        fn create_character(ref self: ContractState, name: felt252, stats: Array<u32>) -> CharId {
+    impl StarkWarsImpl of StarkWarsTrait<ContractState> {
+        fn create_character(ref self: ContractState, name: ByteArray, stats: Array<u32>) -> CharId {
             validate_stats(stats.span());
-            let caller = get_caller_address();
+            let caller_address = get_caller_address();
             let char_id = self.char_next_id.read();
             self.characters.entry(char_id).name.write(name);
             for stat in stats {
                 self.characters.entry(char_id).stats.append().write(stat);
             };
-            self.owners.entry(char_id).write(caller);
-            self.owner_to_characters.entry(caller).append().write(char_id);
+            self.character_to_owner.entry(char_id).write(caller_address);
+            self.owner_to_character.entry(caller_address).append().write(char_id);
             self.char_next_id.write(char_id + 1);
             char_id
         }
@@ -163,25 +157,23 @@ pub mod Starkwars {
             if char_id >= self.char_next_id.read() {
                 panic!("character does not exist");
             }
-            if self.owners.entry(char_id).read() != get_caller_address() {
+            if self.character_to_owner.entry(char_id).read() != get_caller_address() {
                 panic!("caller is not the owner of the character");
             }
             let challenger = self.challanger.read();
             if challenger.is_none() {
                 self.challanger.write(Option::Some(char_id));
-            }
-            else {
-                let winner_char_id = self.duel(self.challanger.read().unwrap(), char_id);
+            } else {
+                let winner_char_id = self.duel(self.challanger.read().unwrap(), char_id, false); // FIXME
                 if winner_char_id != 0 {
-                    self.challanger.write(Option::Some(winner_char_id)); 
+                    self.challanger.write(Option::Some(winner_char_id));
                 }
             }
-
         }
 
-        fn get_my_characters(self: @ContractState) -> Array<(CharId, felt252, Array<u32>)> {
+        fn get_my_characters(self: @ContractState) -> Array<(CharId, ByteArray, Array<u32>)> {
             let caller_address = get_caller_address();
-            let char_ids = self.owner_to_characters.entry(caller_address);
+            let char_ids = self.owner_to_character.entry(caller_address);
             let mut characters = array![];
             for i in 0..char_ids.len() {
                 let char_id = char_ids.at(i).read();
@@ -196,7 +188,7 @@ pub mod Starkwars {
             characters
         }
 
-        fn get_challenger(self: @ContractState) -> Option<(CharId, felt252, Array<u32>)> {
+        fn get_challenger(self: @ContractState) -> Option<(CharId, ByteArray, Array<u32>)> {
             let challenger = self.challanger.read();
             match challenger {
                 Option::Some(char_id) => {
