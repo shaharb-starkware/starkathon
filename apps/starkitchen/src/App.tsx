@@ -1,5 +1,5 @@
 import './App.css';
-import { StarkitchenApp } from './components/StarkitchenApp';
+import { Game } from './components/Game';
 import ErrorBoundary from './components/ErrorBoundary/ErrorBoundary';
 import { StarknetProvider } from './providers/StarknetProvider';
 
@@ -12,7 +12,7 @@ import { StarknetProvider } from './providers/StarknetProvider';
 const App = () => (
   <ErrorBoundary>
     <StarknetProvider>
-      <StarkitchenApp />
+      <Game />
     </StarknetProvider>
   </ErrorBoundary>
 );
