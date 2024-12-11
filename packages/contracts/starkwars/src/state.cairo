@@ -27,6 +27,7 @@ pub mod State {
         fn create_character(ref self: TState, stats: Array<u32>) -> CharId;
         fn add_scenario(ref self: TState, scenario: Scenario);
         fn play(ref self: TState, char_id: CharId);
+        fn get_my_characters(self: @TState) -> Array<(felt252, Array<u32>)>;
     }
 
     #[abi(embed_v0)]
@@ -54,6 +55,41 @@ pub mod State {
 
         fn play(ref self: ContractState, char_id: CharId) {
             
+        }
+
+        fn get_my_characters(self: @ContractState) -> Array<(felt252, Array<u32>)> {
+            let mut result1 = ArrayTrait::new();
+            let mut result2 = ArrayTrait::new();
+            result1.append(0);
+            result1.append(1);
+            result1.append(2);
+            result1.append(3);
+            result1.append(4);
+            result1.append(5);
+            result1.append(6);
+            result1.append(7);
+            result1.append(8);
+            result1.append(9);
+            result1.append(0);
+            result1.append(9);
+
+            result2.append(0);
+            result2.append(0);
+            result2.append(0);
+            result2.append(0);
+            result2.append(0);
+            result2.append(0);
+            result2.append(9);
+            result2.append(9);
+            result2.append(9);
+            result2.append(9);
+            result2.append(9);
+            result2.append(9);
+
+            let mut result = ArrayTrait::new();
+            result.append(('foo', result1));
+            result.append(('bar', result2));
+            result
         }
     }
 }

@@ -54,6 +54,7 @@ export const useMealData = () => {
         { seconds: aMonthFromNowTimestampSeconds },
       ],
     });
+  console.log(rawMealEvents)
   const { data: rawUserMealParticipations, refetch: getUserEventsByTime } =
     useReadContract({
       functionName: 'get_user_events_by_time',
