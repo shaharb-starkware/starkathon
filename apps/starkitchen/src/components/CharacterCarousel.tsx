@@ -87,8 +87,15 @@ const characters = [
     },
 ]
 
-export default function CharacterCarousel() {
+export default function CharacterCarousel({onSelectCharacter}:{onSelectCharacter: (character: any) => void}) {
     const [selectedCharacter, setSelectedCharacter] = useState<number | null>(null)
+
+    const handleSelectCharacter = (character) => {
+        setSelectedCharacter(character.id)
+        onSelectCharacter(character)
+    }
+
+
 
     const { data: rawCharacters } =
         useReadContract({
@@ -101,34 +108,36 @@ export default function CharacterCarousel() {
         return {
             id: index,
             name: shortString.decodeShortString(object["0"]),
-            image: "/placeholder.svg?height=200&width=150",
+            image: "src/assets/default-avatar?height=200&width=150",
             stats: [
-                { name: "STR", value: Number(object["1"][0]) },
-                { name: "DEX", value: Number(object["1"][1]) },
-                { name: "CON", value: Number(object["1"][2]) },
-                { name: "INT", value: Number(object["1"][3]) },
-                { name: "WIS", value: Number(object["1"][4]) },
-                { name: "CHA", value: Number(object["1"][5]) },
-                { name: "HP", value: Number(object["1"][6]) },
-                { name: "AC", value: Number(object["1"][7]) },
-                { name: "ATK", value: Number(object["1"][8]) },
-                { name: "DMG", value: Number(object["1"][9]) },
-                { name: "SPD", value: Number(object["1"][10]) },
-                { name: "INI", value: Number(object["1"][11]) },
+                { name: "PRT", value: Number(object["1"][0]) },
+                { name: "DGN", value: Number(object["1"][1]) },
+                { name: "ANS", value: Number(object["1"][2]) },
+                { name: "CNN", value: Number(object["1"][3]) },
+                { name: "FRN", value: Number(object["1"][4]) },
+                { name: "LCK", value: Number(object["1"][5]) },
+                { name: "GRE", value: Number(object["1"][6]) },
+                { name: "IRG", value: Number(object["1"][7]) },
+                { name: "BBE", value: Number(object["1"][8]) },
+                { name: "CRI", value: Number(object["1"][9]) },
+                { name: "OPT", value: Number(object["1"][10]) },
+                { name: "HLK", value: Number(object["1"][11]) },
             ]
         }
     });
 
+    const centerClass = myCharacters.length < 3 ? 'justify-center' : ''
+
     return (
         <Carousel className="w-full max-w-5xl mx-auto">
-            <CarouselContent>
+            <CarouselContent className={`${centerClass}`}>
                 {myCharacters.map((character) => (
                     <CarouselItem key={character.id} className="md:basis-1/2 lg:basis-1/3 xl:basis-1/3 py-2">
                         <div className="p-1">
                             <CharacterCard
                                 character={character}
                                 isSelected={selectedCharacter === character.id}
-                                onSelect={() => setSelectedCharacter(character.id)}
+                                onSelect={() => handleSelectCharacter(character)}
                             />
                         </div>
                     </CarouselItem>

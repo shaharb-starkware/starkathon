@@ -10,9 +10,9 @@ import { Card, CardContent } from "@/components/ui/card"
 import { ArrowUp, ArrowDown, Upload } from 'lucide-react'
 import { Stats } from '../consts'
 
-export default function CharacterCreationForm() {
+export default function CharacterCreationForm( {onSubmit}: {onSubmit: ()=>void}) {
     const [name, setName] = useState('')
-    const [statValues, setStatValues] = useState(Object.fromEntries(Object.values(Stats).map(stat => [stat, 0])))
+    const [statValues, setStatValues] = useState(Object.fromEntries(Object.values(Stats).map(stat => [stat.name, 0])))
     const [image, setImage] = useState<File | null>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
     const { address } = useAccount();
@@ -26,10 +26,6 @@ export default function CharacterCreationForm() {
     const totalStats = Object.values(statValues).reduce((sum, value) => sum + value, 0)
 
     const formatCharacterData = () => {
-        // setFormattedData({
-        //     name,
-        //     stats: Object.values(statValues),
-        // })
         return {
             name,
             stats: Object.values(statValues),
@@ -61,7 +57,6 @@ export default function CharacterCreationForm() {
         e.preventDefault()
         // Here you would typically send the data to your backend
         const { name, stats } = formatCharacterData();
-        console.log("AAAAAA", name, stats);
         if (contract && address) {
             send ([contract.populate("create_character", [stats])]);
         }
@@ -73,12 +68,12 @@ export default function CharacterCreationForm() {
             <CardContent className="space-y-6 p-6">
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
-                        <Label htmlFor="name" className="text-white">Character Name</Label>
+                        <Label htmlFor="name" className="text-white text-xl">Character Name</Label>
                         <Input id="name" value={name} onChange={(e) => setName(e.target.value)} required className="bg-white/20 text-white placeholder-white/50" />
                     </div>
 
                     <div>
-                        <Label htmlFor="image" className="text-white">Character Image</Label>
+                        <Label htmlFor="image" className="text-white text-xl">Character Image</Label>
                         <div className="mt-2 flex items-center">
                             <Input id="image" type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
                             <Button type="button" onClick={() => document.getElementById('image')?.click()} variant="outline" className="text-white border-white bg-transparent hover:bg-white/20 mr-4 ">
@@ -91,28 +86,31 @@ export default function CharacterCreationForm() {
                     </div>
 
                     <div>
-                        <Label className="text-white">Character Stats (Total: {totalStats}/45)</Label>
+                        <Label className="text-white text-xl">Character Stats (Total: {totalStats}/45)</Label>
                         <div className="grid grid-cols-1 gap-4 mt-2">
-                            {Object.values(Stats).map(stat => (
-                                <div key={stat} className="flex items-center justify-between">
-                                    <span className="text-white">{stat}</span>
+                            {Object.values(Stats).map(({name, symbol, icon: Icon}) => (
+                                <div key={name} className="flex items-center justify-between">
+                                    <div className="flex gap-2 text-white">
+                                        <Icon/>
+                                        <span className="text-white">{`${name} (${symbol})`}</span>
+                                    </div>
                                     <div className="flex items-center">
                                         <Button
                                             type="button"
                                             variant="outline"
                                             size="icon"
                                             className="h-8 w-8 text-white border-white bg-transparent hover:bg-white/20"
-                                            onClick={() => handleStatChange(stat, -1)}
+                                            onClick={() => handleStatChange(name, -1)}
                                         >
                                             <ArrowDown className="h-4 w-4" />
                                         </Button>
-                                        <span className="mx-2 w-6 text-center text-white">{statValues[stat]}</span>
+                                        <span className="mx-2 w-6 text-center text-white">{statValues[name]}</span>
                                         <Button
                                             type="button"
                                             variant="outline"
                                             size="icon"
                                             className="h-8 w-8 text-white border-white bg-transparent hover:bg-white/20"
-                                            onClick={() => handleStatChange(stat, 1)}
+                                            onClick={() => handleStatChange(name, 1)}
                                         >
                                             <ArrowUp className="h-4 w-4" />
                                         </Button>

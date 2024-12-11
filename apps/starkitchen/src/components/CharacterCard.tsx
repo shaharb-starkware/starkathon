@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import {Image} from "@/components/ui/image.tsx";
+import {Stats} from "@/consts.ts";
 
 interface Stat {
     name: string
@@ -36,13 +37,17 @@ export default function CharacterCard({ character, isSelected, onSelect }: Chara
                         height={192}
                     />
                 </div>
-                <div className="grid grid-cols-3 gap-2 text-sm">
-                    {character.stats.map((stat, index) => (
-                        <div key={index} className="flex flex-col items-center">
-                            <span className="font-semibold">{stat.name}</span>
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                    {character.stats.map((stat, index) => {
+                        const Icon = Stats[stat.name].icon
+                        return (<div key={index} className="flex flex-col items-center">
+                            <div className="flex gap-1">
+                                <Icon />
+                                <span className="font-semibold">{stat.name}</span>
+                            </div>
                             <span>{stat.value}</span>
-                        </div>
-                    ))}
+                        </div>)
+                    })}
                 </div>
             </CardContent>
         </Card>
