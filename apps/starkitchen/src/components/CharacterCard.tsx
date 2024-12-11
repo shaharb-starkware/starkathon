@@ -1,4 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card"
+import {Image} from "@/components/ui/image.tsx";
 
 interface Stat {
     name: string
@@ -21,16 +22,18 @@ interface CharacterCardProps {
 export default function CharacterCard({ character, isSelected, onSelect }: CharacterCardProps) {
     return (
         <Card
-            className={`cursor-pointer transition-all w-[280px] mx-auto ${isSelected ? 'ring-4 ring-yellow-500' : ''}`}
+            className={`cursor-pointer transition-all w-[280px] mx-auto ${isSelected ? 'ring-8 ring-yellow-500' : ''}`}
             onClick={onSelect}
         >
             <CardContent className="p-4 flex flex-col">
                 <h3 className="text-xl font-bold text-center mb-2">{character.name}</h3>
                 <div className="relative w-full h-48 mb-4">
-                    <img
+                    <Image
                         src={character.image}
                         alt={character.name}
-                        style={{ objectFit: 'cover', width: 280, height: 192 }}
+                        className="rounded-md object-cover"
+                        width={280}
+                        height={192}
                     />
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-sm">

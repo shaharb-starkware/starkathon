@@ -6,8 +6,10 @@ import {CreateButton} from "@/components/ActionButtons/CreateButton.tsx";
 import {PlayButton} from "@/components/ActionButtons/PlayButton.tsx";
 // import {useAccount} from "@starknet-react/core";
 
-export const WelcomeScreen =  () => {
+export const WelcomeScreen =  ({onCreateCharClick}: {onCreateCharClick: ()=>void}) => {
     // const starknetWallet = useAccount();
+
+
 
 
     return (
@@ -21,8 +23,8 @@ export const WelcomeScreen =  () => {
                     <CharacterCarousel/>
                 </div>
                 <div className="mt-8 flex flex-col items-center gap-6">
-                    <CreateButton/>
                     <PlayButton/>
+                    <CreateButton onClick={onCreateCharClick}/>
                 </div>
             </main>
         </div>
