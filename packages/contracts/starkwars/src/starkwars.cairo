@@ -43,6 +43,7 @@ pub mod StarkWars {
         fn add_scenario(ref self: TState, scenario: Scenario) -> ScenarioId;
         fn play(ref self: TState, char_id: CharId);
         fn get_my_characters(self: @TState) -> Array<(CharId, ByteArray, Array<u32>)>;
+        fn foo_get_my_characters(self: @TState, caller_address: ContractAddress) -> Array<(CharId, ByteArray, Array<u32>)>;
         fn get_challenger(self: @TState) -> Option<(CharId, ByteArray, Array<u32>)>;
     }
 
@@ -175,6 +176,22 @@ pub mod StarkWars {
 
         fn get_my_characters(self: @ContractState) -> Array<(CharId, ByteArray, Array<u32>)> {
             let caller_address = get_caller_address();
+            let char_ids = self.owner_to_character.entry(caller_address);
+            let mut characters = array![];
+            for i in 0..char_ids.len() {
+                let char_id = char_ids.at(i).read();
+                let name = self.characters.entry(char_id).name.read();
+                let mut stats = array![];
+                let self_stats = self.characters.entry(char_id).stats;
+                for j in 0..self_stats.len() {
+                    stats.append(self_stats.at(j).read());
+                };
+                characters.append((char_id, name, stats));
+            };
+            characters
+        }
+
+        fn foo_get_my_characters(self: @ContractState, caller_address: ContractAddress) -> Array<(CharId, ByteArray, Array<u32>)> {
             let char_ids = self.owner_to_character.entry(caller_address);
             let mut characters = array![];
             for i in 0..char_ids.len() {
