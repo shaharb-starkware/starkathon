@@ -12,7 +12,6 @@ pub mod Starkwars {
     use openzeppelin_access::ownable::OwnableComponent;
     use core::poseidon::{HashState, PoseidonTrait};
     use core::hash::{HashStateTrait};
-    // use core::num::traits::ops::pow::Pow;
 
     const STAT_SUM: u32 = 45;
     const LIVES: u32 = 2;
@@ -108,13 +107,16 @@ pub mod Starkwars {
             let mut lives2 = LIVES;
             for scenario_index in random_indices {
                 let scenario = self.scenarios.entry((*scenario_index).try_into().unwrap()).read();
-                let stat = scenario.required_stat;
-                let stat1 = self.characters.entry(char_id1).stats[stat].read();
-                let stat2 = self.characters.entry(char_id2).stats[stat].read();
-                if stat1 < scenario.min_value {
+                let stat1 = scenario.stat1;
+                let stat1_char1 = self.characters.entry(char_id1).stats[stat1].read();
+                let stat1_char2 = self.characters.entry(char_id2).stats[stat1].read();
+                let stat2 = scenario.stat2;
+                let stat2_char1 = self.characters.entry(char_id1).stats[stat2].read();
+                let stat2_char2 = self.characters.entry(char_id2).stats[stat2].read();
+                if stat1_char1 < scenario.min_value1 && stat2_char1 < scenario.min_value2 {
                     lives1 -= 1;
                 }
-                if stat2 < scenario.min_value {
+                if stat1_char2 < scenario.min_value1 && stat2_char2 < scenario.min_value2 {
                     lives2 -= 1;
                 }
                 if lives1 == 0 || lives2 == 0 {

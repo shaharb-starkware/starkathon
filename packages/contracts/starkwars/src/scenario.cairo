@@ -1,8 +1,10 @@
 #[derive(Drop, Serde, starknet::Store)]
 pub struct Scenario {
     pub name: ByteArray,
-    pub required_stat: u64,
-    pub min_value: u32
+    pub stat1: u64,
+    pub min_value1: u32,
+    pub stat2: u64,
+    pub min_value2: u32
 }
 
 // impl ScenarioZero of core::num::traits::Zero<Scenario> {
