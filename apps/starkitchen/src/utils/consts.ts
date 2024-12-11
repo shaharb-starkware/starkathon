@@ -7,16 +7,16 @@ export const SrcPrefix =
 
 /// The address of the deployed contract.
 export const CONTRACT_ADDRESS =
-  '0x0313650fdd62f68cc3ca6648037508e6ab7dc7336959ebd8c05e624db8d64038';
+  '0x03904a5cbc0367094343f74d1b3752da82bed57e3ab80b1e161a778e3d38fb34';
 /// The ABI of the deployed contract. Can be found on starkscan.
 /// For the above contract, the ABI can be found at:
 /// https://sepolia.starkscan.co/contract/0x049c75609bb077a9427bc26a9935472ec75e5508ed216ef7f7ad2693397deebc
 /// And the ABI is accessible under the 'Class Code/History' tab -> 'Copy ABI Code' button.
 export const ABI = [
   {
-    "name": "WorldStateImpl",
+    "name": "StarkWarsImpl",
     "type": "impl",
-    "interface_name": "starkwars::state::State::WorldStateTrait"
+    "interface_name": "starkwars::starkwars::StarkWars::StarkWarsTrait"
   },
   {
     "name": "core::byte_array::ByteArray",
@@ -45,27 +45,49 @@ export const ABI = [
         "type": "core::byte_array::ByteArray"
       },
       {
-        "name": "required_stat",
+        "name": "stat1",
+        "type": "core::integer::u64"
+      },
+      {
+        "name": "min_value1",
         "type": "core::integer::u32"
       },
       {
-        "name": "min_value",
-        "type": "core::integer::u32"
+        "name": "stat2",
+        "type": "core::integer::u64"
       },
       {
-        "name": "id",
+        "name": "min_value2",
         "type": "core::integer::u32"
       }
     ]
   },
   {
-    "name": "starkwars::state::State::WorldStateTrait",
+    "name": "core::option::Option::<(core::integer::u32, core::byte_array::ByteArray, core::array::Array::<core::integer::u32>)>",
+    "type": "enum",
+    "variants": [
+      {
+        "name": "Some",
+        "type": "(core::integer::u32, core::byte_array::ByteArray, core::array::Array::<core::integer::u32>)"
+      },
+      {
+        "name": "None",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "name": "starkwars::starkwars::StarkWars::StarkWarsTrait",
     "type": "interface",
     "items": [
       {
         "name": "create_character",
         "type": "function",
         "inputs": [
+          {
+            "name": "name",
+            "type": "core::byte_array::ByteArray"
+          },
           {
             "name": "stats",
             "type": "core::array::Array::<core::integer::u32>"
@@ -87,7 +109,11 @@ export const ABI = [
             "type": "starkwars::scenario::Scenario"
           }
         ],
-        "outputs": [],
+        "outputs": [
+          {
+            "type": "core::integer::u32"
+          }
+        ],
         "state_mutability": "external"
       },
       {
@@ -108,7 +134,18 @@ export const ABI = [
         "inputs": [],
         "outputs": [
           {
-            "type": "core::array::Array::<(core::felt252, core::array::Array::<core::integer::u32>)>"
+            "type": "core::array::Array::<(core::integer::u32, core::byte_array::ByteArray, core::array::Array::<core::integer::u32>)>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "get_challenger",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::option::Option::<(core::integer::u32, core::byte_array::ByteArray, core::array::Array::<core::integer::u32>)>"
           }
         ],
         "state_mutability": "view"
@@ -116,9 +153,112 @@ export const ABI = [
     ]
   },
   {
-    "kind": "enum",
-    "name": "starkwars::state::State::Event",
+    "name": "OwnableImpl",
+    "type": "impl",
+    "interface_name": "openzeppelin_access::ownable::interface::IOwnable"
+  },
+  {
+    "name": "openzeppelin_access::ownable::interface::IOwnable",
+    "type": "interface",
+    "items": [
+      {
+        "name": "owner",
+        "type": "function",
+        "inputs": [],
+        "outputs": [
+          {
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "transfer_ownership",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "new_owner",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      },
+      {
+        "name": "renounce_ownership",
+        "type": "function",
+        "inputs": [],
+        "outputs": [],
+        "state_mutability": "external"
+      }
+    ]
+  },
+  {
+    "name": "constructor",
+    "type": "constructor",
+    "inputs": []
+  },
+  {
+    "kind": "struct",
+    "name": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred",
     "type": "event",
-    "variants": []
+    "members": [
+      {
+        "kind": "key",
+        "name": "previous_owner",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "kind": "key",
+        "name": "new_owner",
+        "type": "core::starknet::contract_address::ContractAddress"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted",
+    "type": "event",
+    "members": [
+      {
+        "kind": "key",
+        "name": "previous_owner",
+        "type": "core::starknet::contract_address::ContractAddress"
+      },
+      {
+        "kind": "key",
+        "name": "new_owner",
+        "type": "core::starknet::contract_address::ContractAddress"
+      }
+    ]
+  },
+  {
+    "kind": "enum",
+    "name": "openzeppelin_access::ownable::ownable::OwnableComponent::Event",
+    "type": "event",
+    "variants": [
+      {
+        "kind": "nested",
+        "name": "OwnershipTransferred",
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferred"
+      },
+      {
+        "kind": "nested",
+        "name": "OwnershipTransferStarted",
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted"
+      }
+    ]
+  },
+  {
+    "kind": "enum",
+    "name": "starkwars::starkwars::StarkWars::Event",
+    "type": "event",
+    "variants": [
+      {
+        "kind": "nested",
+        "name": "OwnableEvent",
+        "type": "openzeppelin_access::ownable::ownable::OwnableComponent::Event"
+      }
+    ]
   }
 ] as const satisfies Abi;

@@ -51,7 +51,7 @@ pub mod StarkWars {
         self.char_next_id.write(0);
         self.scenario_next_id.write(0);
         self.ownable.initializer(get_caller_address());
-        let char_id = self.create_character("Default", array![4, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5]);
+        let char_id = self.create_character("Default", array![4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3]);
         self.challanger.write(Option::Some(char_id));
     }
 
