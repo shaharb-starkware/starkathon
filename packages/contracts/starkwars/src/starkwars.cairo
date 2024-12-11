@@ -1,5 +1,5 @@
 #[starknet::contract]
-pub mod State {
+pub mod Starkwars {
     use starknet::storage::MutableVecTrait;
     use starknet::storage::StoragePathEntry;
     use crate::scenario::Scenario;
