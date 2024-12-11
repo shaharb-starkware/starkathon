@@ -38,7 +38,7 @@ pub mod StarkWars {
     }
 
     #[starknet::interface]
-    pub trait StarkWarsTrait<TState> {
+    pub trait IStarkWars<TState> {
         fn create_character(ref self: TState, name: ByteArray, stats: Array<u32>) -> CharId;
         fn add_scenario(ref self: TState, scenario: Scenario) -> ScenarioId;
         fn play(ref self: TState, char_id: CharId);
@@ -130,7 +130,7 @@ pub mod StarkWars {
     }
 
     #[abi(embed_v0)]
-    impl StarkWarsImpl of StarkWarsTrait<ContractState> {
+    impl StarkWarsImpl of IStarkWars<ContractState> {
         fn create_character(ref self: ContractState, name: ByteArray, stats: Array<u32>) -> CharId {
             validate_stats(stats.span());
             let caller_address = get_caller_address();
