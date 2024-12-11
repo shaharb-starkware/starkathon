@@ -3,8 +3,7 @@ members = ["packages/contracts/starkwars"]
 
 [workspace.dependencies]
 starknet = "2.9.1"
-
-[workspace.dev-dependencies]
+openzeppelin_access = "0.20.0"
 snforge_std = { git = "https://github.com/foundry-rs/starknet-foundry", tag = "v0.34.0" }
 assert_macros = "2.9.1"
 
