@@ -1,4 +1,4 @@
-mod state;
+mod starkwars;
 mod character;
 mod scenario;
 
