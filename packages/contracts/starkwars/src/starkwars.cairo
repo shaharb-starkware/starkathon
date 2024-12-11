@@ -168,8 +168,10 @@ pub mod Starkwars {
                 self.challanger.write(Option::Some(char_id));
             }
             else {
-                let winner_char = self.duel(self.challanger.read().unwrap(), char_id);
-                self.challanger.write(Option::Some(winner_char));
+                let winner_char_id = self.duel(self.challanger.read().unwrap(), char_id);
+                if winner_char_id != 0 {
+                    self.challanger.write(Option::Some(winner_char_id)); 
+                }
             }
 
         }
