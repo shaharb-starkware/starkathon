@@ -1,6 +1,8 @@
 'use client'
 
+import { ABI, CONTRACT_ADDRESS } from '@/utils/consts';
 import { useState, useCallback } from 'react'
+import { useAccount, useContract, useSendTransaction } from '@starknet-react/core';
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,10 +15,21 @@ export default function CharacterCreationForm() {
     const [statValues, setStatValues] = useState(Object.fromEntries(Object.values(Stats).map(stat => [stat, 0])))
     const [image, setImage] = useState<File | null>(null)
     const [imagePreview, setImagePreview] = useState<string | null>(null)
+    const { address } = useAccount();
+    const { contract } = useContract({
+        abi: ABI,
+        address: CONTRACT_ADDRESS
+    });
+    // const [formattedData, setFormattedData] = useState(undefined);
+    const { send, error } = useSendTransaction({calls: []});
 
     const totalStats = Object.values(statValues).reduce((sum, value) => sum + value, 0)
 
     const formatCharacterData = () => {
+        // setFormattedData({
+        //     name,
+        //     stats: Object.values(statValues),
+        // })
         return {
             name,
             stats: Object.values(statValues),
@@ -47,8 +60,11 @@ export default function CharacterCreationForm() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault()
         // Here you would typically send the data to your backend
-        console.log({ name, statValues, image })
-        console.log(formatCharacterData())
+        const { name, stats } = formatCharacterData();
+        console.log("AAAAAA", name, stats);
+        if (contract && address) {
+            send ([contract.populate("create_character", [stats])]);
+        }
         // Navigate back to the main page
     }
 
