@@ -1,9 +1,11 @@
 #[starknet::contract]
 pub mod Starkwars {
     use starknet::storage::MutableVecTrait;
+    use starknet::storage::VecTrait;
     use starknet::storage::StoragePathEntry;
+    use starknet::get_caller_address;
     use crate::scenario::Scenario;
-    use core::starknet::storage::Map;
+    use core::starknet::storage::{Map, Vec};
     use crate::character::Character;
     use core::starknet::ContractAddress;
     use starknet::storage::{StoragePointerReadAccess, StoragePointerWriteAccess};
@@ -18,25 +20,32 @@ pub mod Starkwars {
         scenarios: Map<ScenarioId, Option<Scenario>>,
         characters: Map<CharId, Character>,
         owners: Map<CharId, ContractAddress>,
+        owner_to_characters: Map<ContractAddress, Vec<CharId>>,
         challanger: CharId,
         next_id: CharId
     }
 
     #[starknet::interface]
     pub trait WorldStateTrait<TState> {
-        fn create_character(ref self: TState, stats: Array<u32>) -> CharId;
+        fn create_character(ref self: TState, name: felt252, stats: Array<u32>) -> CharId;
         fn add_scenario(ref self: TState, scenario: Scenario);
         fn play(ref self: TState, char_id: CharId);
-        fn get_my_characters(self: @TState) -> Array<(felt252, Array<u32>)>;
+        fn get_my_characters(self: @TState) -> Array<(CharId, felt252, Array<u32>)>;
     }
 
     #[abi(embed_v0)]
     impl WorldStateImpl of WorldStateTrait<ContractState> {
-        fn create_character(ref self: ContractState, stats: Array<u32>) -> CharId {
+        fn create_character(ref self: ContractState, name: felt252, stats: Array<u32>) -> CharId {
+            let caller_address = get_caller_address();
             let char_id = self.next_id.read();
+            self.characters.entry(char_id).name.write(name);
             for stat in stats {
                 self.characters.entry(char_id).stats.append().write(stat);
             };
+
+            self.owners.entry(char_id).write(caller_address);
+            self.owner_to_characters.entry(caller_address).append().write(char_id);
+
             self.next_id.write(char_id + 1);
             char_id
         }
@@ -57,39 +66,21 @@ pub mod Starkwars {
             
         }
 
-        fn get_my_characters(self: @ContractState) -> Array<(felt252, Array<u32>)> {
-            let mut result1 = ArrayTrait::new();
-            let mut result2 = ArrayTrait::new();
-            result1.append(0);
-            result1.append(1);
-            result1.append(2);
-            result1.append(3);
-            result1.append(4);
-            result1.append(5);
-            result1.append(6);
-            result1.append(7);
-            result1.append(8);
-            result1.append(9);
-            result1.append(0);
-            result1.append(9);
-
-            result2.append(0);
-            result2.append(0);
-            result2.append(0);
-            result2.append(0);
-            result2.append(0);
-            result2.append(0);
-            result2.append(9);
-            result2.append(9);
-            result2.append(9);
-            result2.append(9);
-            result2.append(9);
-            result2.append(9);
-
-            let mut result = ArrayTrait::new();
-            result.append(('foo', result1));
-            result.append(('bar', result2));
-            result
+        fn get_my_characters(self: @ContractState) -> Array<(CharId, felt252, Array<u32>)> {
+            let caller_address = get_caller_address();
+            let char_ids = self.owner_to_characters.entry(caller_address);
+            let mut characters = array![];
+            for i in 0..char_ids.len() {
+                let char_id = char_ids.at(i).read();
+                let name = self.characters.entry(char_id).name.read();
+                let mut stats = array![];
+                let self_stats = self.characters.entry(char_id).stats;
+                for j in 0..self_stats.len() {
+                    stats.append(self_stats.at(j).read());
+                };
+                characters.append((char_id, name, stats));
+            };
+            characters
         }
     }
 }
