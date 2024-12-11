@@ -52,6 +52,7 @@ pub mod Starkwars {
         fn add_scenario(ref self: TState, scenario: Scenario) -> ScenarioId;
         fn play(ref self: TState, char_id: CharId);
         fn get_my_characters(self: @TState) -> Array<(CharId, felt252, Array<u32>)>;
+        fn get_challenger(self: @TState) -> Option<(CharId, felt252, Array<u32>)>;
     }
 
     #[constructor]
@@ -193,6 +194,22 @@ pub mod Starkwars {
                 characters.append((char_id, name, stats));
             };
             characters
+        }
+
+        fn get_challenger(self: @ContractState) -> Option<(CharId, felt252, Array<u32>)> {
+            let challenger = self.challanger.read();
+            match challenger {
+                Option::Some(char_id) => {
+                    let name = self.characters.entry(char_id).name.read();
+                    let mut stats = array![];
+                    let self_stats = self.characters.entry(char_id).stats;
+                    for j in 0..self_stats.len() {
+                        stats.append(self_stats.at(j).read());
+                    };
+                    Option::Some((char_id, name, stats))
+                },
+                Option::None => Option::None,
+            }
         }
     }
 }

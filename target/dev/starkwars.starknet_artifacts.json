@@ -1,1 +1,1 @@
-{"version":1,"contracts":[{"id":"fkbs0ngaqevmo","package_name":"starkwars","contract_name":"State","module_path":"starkwars::state::State","artifacts":{"sierra":"starkwars_State.contract_class.json","casm":null}}]}
+{"version":1,"contracts":[{"id":"fh2odeb1ci5tg","package_name":"starkwars","contract_name":"Starkwars","module_path":"starkwars::starkwars::Starkwars","artifacts":{"sierra":"starkwars_Starkwars.contract_class.json","casm":null}}]}
