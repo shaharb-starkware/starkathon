@@ -68,7 +68,7 @@ pub mod StarkWars {
     fn constructor(ref self: ContractState) {
         self.char_next_id.write(0);
         self.challenge_next_id.write(0);
-        self.ownable.initializer(get_caller_address());
+        self.ownable.initializer(owner: get_caller_address());
         let char_id = self.create_character("Default", array![4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3]);
         self.challanger.write(char_id);
         self.emit(Events::ChallengerUpdated { new_challenger: char_id });
