@@ -1,8 +1,10 @@
 pub mod starkwars;
 pub mod character;
-pub mod scenario;
+pub mod challenge;
 pub mod constants;
 pub mod types;
+pub mod interface;
+
 // /// Interface representing `HelloContract`.
 // /// This interface allows modification and retrieval of the contract balance.
 // #[starknet::interface]

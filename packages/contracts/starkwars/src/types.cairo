@@ -1,2 +1,2 @@
 pub type CharId = u32;
-pub type ScenarioId = u32;
+pub type ChallengeId = u32;

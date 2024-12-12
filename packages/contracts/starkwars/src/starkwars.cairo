@@ -1,14 +1,16 @@
 #[starknet::contract]
 pub mod StarkWars {
-    use core::hash::{HashStateTrait};
+    use starknet::event::EventEmitter;
+use core::hash::{HashStateTrait};
     use core::num::traits::Pow;
     use core::poseidon::{HashState, PoseidonTrait};
     use core::starknet::{ContractAddress, get_caller_address};
     use core::starknet::storage::{Map, Vec};
     use crate::character::Character;
     use crate::constants::{STAT_SUM, SEGMENTS, MAX_SCENARIOS, LIVES, MIN_STAT_VALUE, MAX_STAT_VALUE};
-    use crate::scenario::Scenario;
-    use crate::types::{CharId, ScenarioId};
+    use crate::challenge::Challenge;
+    use crate::types::{CharId, ChallengeId};
+    use crate::interface::{IStarkWars, Events};
     use starknet::storage::{MutableVecTrait, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess, VecTrait};
     use openzeppelin_access::ownable::OwnableComponent;
 
@@ -20,13 +22,13 @@ pub mod StarkWars {
 
     #[storage]
     struct Storage {
-        scenarios: Map<ScenarioId, Scenario>, // TODO consider change to Vec
+        challenges: Map<ChallengeId, Challenge>, // TODO consider change to Vec
         characters: Map<CharId, Character>,
         character_to_owner: Map<CharId, ContractAddress>,
         owner_to_character: Map<ContractAddress, Vec<CharId>>,
-        challanger: Option<CharId>,
+        challanger: Option<CharId>, // TODO remove option
         char_next_id: CharId,
-        scenario_next_id: ScenarioId,
+        challenge_next_id: ChallengeId,
         #[substorage(v0)]
         ownable: OwnableComponent::Storage,
     }
@@ -35,25 +37,22 @@ pub mod StarkWars {
     #[derive(Drop, starknet::Event)]
     pub enum Event {
         OwnableEvent: OwnableComponent::Event,
-    }
-
-    #[starknet::interface]
-    pub trait IStarkWars<TState> {
-        fn create_character(ref self: TState, name: ByteArray, stats: Array<u32>) -> CharId;
-        fn add_scenario(ref self: TState, scenario: Scenario) -> ScenarioId;
-        fn play(ref self: TState, char_id: CharId);
-        fn get_my_characters(self: @TState) -> Array<(CharId, ByteArray, Array<u32>)>;
-        fn foo_get_my_characters(self: @TState, caller_address: ContractAddress) -> Array<(CharId, ByteArray, Array<u32>)>;
-        fn get_challenger(self: @TState) -> Option<(CharId, ByteArray, Array<u32>)>;
+        CharacterCreated: Events::CharacterCreated,
+        ChallengeAdded: Events::ChallengeAdded,
+        DuelStarted: Events::DuelStarted,
+        ChallengeAccepted: Events::ChallengeAccepted,
+        DuelEnded: Events::DuelEnded,
+        ChallengerUpdated: Events::ChallengerUpdated,
     }
 
     #[constructor]
     fn constructor(ref self: ContractState) {
         self.char_next_id.write(0);
-        self.scenario_next_id.write(0);
+        self.challenge_next_id.write(0);
         self.ownable.initializer(get_caller_address());
         let char_id = self.create_character("Default", array![4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3]);
         self.challanger.write(Option::Some(char_id));
+        self.emit(Events::ChallengerUpdated { new_challenger: char_id });
     }
 
     fn validate_stats(stats: Span<u32>) {
@@ -95,29 +94,34 @@ pub mod StarkWars {
 
     #[generate_trait]
     impl InternalImpl of InternalTrait {
-        fn duel(ref self: ContractState, char_id1: CharId, char_id2: CharId, random_threshold: bool) -> CharId {
-            let random_indices = get_randomness(len: self.scenario_next_id.read().into());
+        fn duel(ref self: ContractState, char_id1: CharId, char_id2: CharId) -> CharId {
+            self.emit(Events::DuelStarted { char_id1, char_id2 });
+            let random_indices = get_randomness(len: self.challenge_next_id.read().into());
             let mut lives1 = LIVES;
             let mut lives2 = LIVES;
-            for scenario_index in random_indices {
-                let scenario = self.scenarios.entry((*scenario_index).try_into().unwrap()).read();
-                let stat1 = scenario.stat1;
+            for challenge_index in random_indices {
+                let challenge = self.challenges.entry((*challenge_index).try_into().unwrap()).read();
+                let stat1 = challenge.stat1;
                 let stat1_char1 = self.characters.entry(char_id1).stats[stat1].read();
                 let stat1_char2 = self.characters.entry(char_id2).stats[stat1].read();
-                let stat2 = scenario.stat2;
+                let stat2 = challenge.stat2;
                 let stat2_char1 = self.characters.entry(char_id1).stats[stat2].read();
                 let stat2_char2 = self.characters.entry(char_id2).stats[stat2].read();
-                let min_val1 = scenario.min_value1;
-                let min_val2 = scenario.min_value2;
-                if random_threshold {
-
-                }
-                if stat1_char1 < min_val1 && stat2_char1 < min_val2 {
+                let min_val1 = challenge.min_value1;
+                let min_val2 = challenge.min_value2;
+                let char1_survived = stat1_char1 < min_val1 && stat2_char1 < min_val2;
+                let char2_survived = stat1_char2 < min_val1 && stat2_char2 < min_val2;
+                if char1_survived {
                     lives1 -= 1;
                 }
-                if stat1_char2 < min_val1 && stat2_char2 < min_val2 {
+                if char2_survived {
                     lives2 -= 1;
                 }
+                self.emit(Events::ChallengeAccepted { 
+                    challenge_id: (*challenge_index).try_into().unwrap(), 
+                    challenge: challenge, 
+                    survivors: (char1_survived, char2_survived) 
+                });
                 if lives1 == 0 || lives2 == 0 {
                     break;
                 }
@@ -138,22 +142,24 @@ pub mod StarkWars {
             validate_stats(stats.span());
             let caller_address = get_caller_address();
             let char_id = self.char_next_id.read();
-            self.characters.entry(char_id).name.write(name);
-            for stat in stats {
-                self.characters.entry(char_id).stats.append().write(stat);
+            self.characters.entry(char_id).name.write(name.clone());
+            for stat in stats.span() {
+                self.characters.entry(char_id).stats.append().write(*stat);
             };
             self.character_to_owner.entry(char_id).write(caller_address);
             self.owner_to_character.entry(caller_address).append().write(char_id);
             self.char_next_id.write(char_id + 1);
+            self.emit(Events::CharacterCreated { char_id, name, stats });
             char_id
         }
 
-        fn add_scenario(ref self: ContractState, scenario: Scenario) -> ScenarioId {
+        fn add_challenge(ref self: ContractState, challenge: Challenge) -> ChallengeId {
             self.ownable.assert_only_owner();
-            let scenario_id = self.scenario_next_id.read();
-            self.scenarios.entry(scenario_id).write(scenario);
-            self.scenario_next_id.write(scenario_id + 1);
-            scenario_id
+            let challenge_id = self.challenge_next_id.read();
+            self.challenges.entry(challenge_id).write(challenge.clone());
+            self.challenge_next_id.write(challenge_id + 1);
+            self.emit(Events::ChallengeAdded { challenge_id, challenge });
+            challenge_id
         }
 
         fn play(ref self: ContractState, char_id: CharId) {
@@ -167,31 +173,17 @@ pub mod StarkWars {
             if challenger.is_none() {
                 self.challanger.write(Option::Some(char_id));
             } else {
-                let winner_char_id = self.duel(self.challanger.read().unwrap(), char_id, false); // FIXME
+                let winner_char_id = self.duel(self.challanger.read().unwrap(), char_id);
+                self.emit(Events::DuelEnded { winner: winner_char_id });
                 if winner_char_id != 0 {
                     self.challanger.write(Option::Some(winner_char_id));
+                    self.emit(Events::ChallengerUpdated { new_challenger: winner_char_id });
                 }
             }
         }
 
         fn get_my_characters(self: @ContractState) -> Array<(CharId, ByteArray, Array<u32>)> {
             let caller_address = get_caller_address();
-            let char_ids = self.owner_to_character.entry(caller_address);
-            let mut characters = array![];
-            for i in 0..char_ids.len() {
-                let char_id = char_ids.at(i).read();
-                let name = self.characters.entry(char_id).name.read();
-                let mut stats = array![];
-                let self_stats = self.characters.entry(char_id).stats;
-                for j in 0..self_stats.len() {
-                    stats.append(self_stats.at(j).read());
-                };
-                characters.append((char_id, name, stats));
-            };
-            characters
-        }
-
-        fn foo_get_my_characters(self: @ContractState, caller_address: ContractAddress) -> Array<(CharId, ByteArray, Array<u32>)> {
             let char_ids = self.owner_to_character.entry(caller_address);
             let mut characters = array![];
             for i in 0..char_ids.len() {
