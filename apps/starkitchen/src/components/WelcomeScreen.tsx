@@ -4,6 +4,7 @@ import {CreateButton} from "@/components/ActionButtons/CreateButton.tsx";
 import { PlayButton } from "@/components/ActionButtons/PlayButton.tsx";
 import { useReadContract } from '@starknet-react/core';
 import { ABI, CONTRACT_ADDRESS } from '@/utils/consts';
+// import {Header} from "@/components/Header/Header.tsx";
 
 
 export const WelcomeScreen =  ({onStartGame, onCreateCharClick, onSelectChar, selectedChar}: {onStartGame: () => void, onCreateCharClick: ()=>void, onSelectChar: ()=> void, selectedChar: any}) => {

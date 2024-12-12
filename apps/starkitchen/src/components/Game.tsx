@@ -1,7 +1,7 @@
 import {WelcomeScreen} from "@/components/WelcomeScreen.tsx";
 import {useState} from "react";
 import CreateCharacterPage from "@/components/CreateCharacterScreen.tsx";
-import {ChallengeScreen} from "@/components/ChallengScreen.tsx";
+import {ChallengeScreen} from "@/components/ChallengeScreen.tsx";
 
 enum ScreenTypes {
     Welcome = 'welcome',
