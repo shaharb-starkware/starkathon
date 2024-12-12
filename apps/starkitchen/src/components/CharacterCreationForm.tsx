@@ -1,5 +1,6 @@
 'use client'
 
+import { shortString } from "starknet";
 import { ABI, CONTRACT_ADDRESS } from '@/utils/consts';
 import { useState, useCallback } from 'react'
 import { useAccount, useContract, useSendTransaction } from '@starknet-react/core';
@@ -58,7 +59,7 @@ export default function CharacterCreationForm( {onSubmit}: {onSubmit: ()=>void})
         // Here you would typically send the data to your backend
         const { name, stats } = formatCharacterData();
         if (contract && address) {
-            send ([contract.populate("create_character", [stats])]);
+            send ([contract.populate("create_character", [name, stats])]);
         }
         // Navigate back to the main page
     }

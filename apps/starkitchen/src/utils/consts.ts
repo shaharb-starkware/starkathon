@@ -7,7 +7,7 @@ export const SrcPrefix =
 
 /// The address of the deployed contract.
 export const CONTRACT_ADDRESS =
-  '0x03904a5cbc0367094343f74d1b3752da82bed57e3ab80b1e161a778e3d38fb34';
+  '0x03f6439d882e01df5a686725295cacbb824178b36a14dad9688b99464c6f2224';
 /// The ABI of the deployed contract. Can be found on starkscan.
 /// For the above contract, the ABI can be found at:
 /// https://sepolia.starkscan.co/contract/0x049c75609bb077a9427bc26a9935472ec75e5508ed216ef7f7ad2693397deebc
@@ -132,6 +132,22 @@ export const ABI = [
         "name": "get_my_characters",
         "type": "function",
         "inputs": [],
+        "outputs": [
+          {
+            "type": "core::array::Array::<(core::integer::u32, core::byte_array::ByteArray, core::array::Array::<core::integer::u32>)>"
+          }
+        ],
+        "state_mutability": "view"
+      },
+      {
+        "name": "foo_get_my_characters",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "caller_address",
+            "type": "core::starknet::contract_address::ContractAddress"
+          }
+        ],
         "outputs": [
           {
             "type": "core::array::Array::<(core::integer::u32, core::byte_array::ByteArray, core::array::Array::<core::integer::u32>)>"

@@ -5,7 +5,7 @@ import { ABI, CONTRACT_ADDRESS } from '@/utils/consts';
 import { useState } from 'react'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import CharacterCard from './CharacterCard'
-import { useReadContract } from '@starknet-react/core';
+import { useAccount, useReadContract } from '@starknet-react/core';
 
 // Mock data for characters with stats
 const characters = [
@@ -89,6 +89,7 @@ const characters = [
 
 export default function CharacterCarousel({onSelectCharacter}:{onSelectCharacter: (character: any) => void}) {
     const [selectedCharacter, setSelectedCharacter] = useState<number | null>(null)
+    const { address } = useAccount();
 
     const handleSelectCharacter = (character) => {
         setSelectedCharacter(character.id)
@@ -99,29 +100,31 @@ export default function CharacterCarousel({onSelectCharacter}:{onSelectCharacter
 
     const { data: rawCharacters } =
         useReadContract({
-            functionName: 'get_my_characters',
+            functionName: 'foo_get_my_characters',
             abi: ABI,
             address: CONTRACT_ADDRESS,
-            args: [],
+            args: [address],
         });
+    console.log("AAAAA", rawCharacters)
+    console.log("BBBBB", address)
     const myCharacters = (rawCharacters || []).map((object : any, index: number) => {
         return {
             id: index,
-            name: shortString.decodeShortString(object["0"]),
+            name: object["1"],
             image: "src/assets/default-avatar?height=200&width=150",
             stats: [
-                { name: "PRT", value: Number(object["1"][0]) },
-                { name: "DGN", value: Number(object["1"][1]) },
-                { name: "ANS", value: Number(object["1"][2]) },
-                { name: "CNN", value: Number(object["1"][3]) },
-                { name: "FRN", value: Number(object["1"][4]) },
-                { name: "LCK", value: Number(object["1"][5]) },
-                { name: "GRE", value: Number(object["1"][6]) },
-                { name: "IRG", value: Number(object["1"][7]) },
-                { name: "BBE", value: Number(object["1"][8]) },
-                { name: "CRI", value: Number(object["1"][9]) },
-                { name: "OPT", value: Number(object["1"][10]) },
-                { name: "HLK", value: Number(object["1"][11]) },
+                { name: "PRT", value: Number(object["2"][0]) },
+                { name: "DGN", value: Number(object["2"][1]) },
+                { name: "ANS", value: Number(object["2"][2]) },
+                { name: "CNN", value: Number(object["2"][3]) },
+                { name: "FRN", value: Number(object["2"][4]) },
+                { name: "LCK", value: Number(object["2"][5]) },
+                { name: "GRE", value: Number(object["2"][6]) },
+                { name: "IRG", value: Number(object["2"][7]) },
+                { name: "BBE", value: Number(object["2"][8]) },
+                { name: "CRI", value: Number(object["2"][9]) },
+                { name: "OPT", value: Number(object["2"][10]) },
+                { name: "HLK", value: Number(object["2"][11]) },
             ]
         }
     });
