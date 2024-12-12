@@ -102,6 +102,20 @@ pub mod StarkWars {
 
     #[generate_trait]
     impl InternalImpl of InternalTrait {
+        fn compete_challenge(self: @ContractState, challenge: Challenge, char_id1: CharId, char_id2: CharId) -> (bool, bool) {
+            let stat1 = challenge.stat1;
+            let stat1_char1 = self.characters.entry(char_id1).stats[stat1].read();
+            let stat1_char2 = self.characters.entry(char_id2).stats[stat1].read();
+            let stat2 = challenge.stat2;
+            let stat2_char1 = self.characters.entry(char_id1).stats[stat2].read();
+            let stat2_char2 = self.characters.entry(char_id2).stats[stat2].read();
+            let min_val1 = challenge.min_value1;
+            let min_val2 = challenge.min_value2;
+            let char1_survived = stat1_char1 < min_val1 && stat2_char1 < min_val2;
+            let char2_survived = stat1_char2 < min_val1 && stat2_char2 < min_val2;
+            (char1_survived, char2_survived)
+        }
+
         fn duel(ref self: ContractState, char_id1: CharId, char_id2: CharId) -> CharId {
             self.emit(Events::DuelStarted { char_id1, char_id2 });
             let random_indices = get_randomness(len: self.challenge_next_id.read().into());
@@ -109,16 +123,7 @@ pub mod StarkWars {
             let mut lives2 = LIVES;
             for challenge_index in random_indices {
                 let challenge = self.challenges.entry((*challenge_index).try_into().unwrap()).read();
-                let stat1 = challenge.stat1;
-                let stat1_char1 = self.characters.entry(char_id1).stats[stat1].read();
-                let stat1_char2 = self.characters.entry(char_id2).stats[stat1].read();
-                let stat2 = challenge.stat2;
-                let stat2_char1 = self.characters.entry(char_id1).stats[stat2].read();
-                let stat2_char2 = self.characters.entry(char_id2).stats[stat2].read();
-                let min_val1 = challenge.min_value1;
-                let min_val2 = challenge.min_value2;
-                let char1_survived = stat1_char1 < min_val1 && stat2_char1 < min_val2;
-                let char2_survived = stat1_char2 < min_val1 && stat2_char2 < min_val2;
+                let (char1_survived, char2_survived) = self.compete_challenge(challenge.clone(), char_id1, char_id2);
                 if char1_survived {
                     lives1 -= 1;
                 }
