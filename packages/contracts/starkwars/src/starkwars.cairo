@@ -4,7 +4,7 @@ pub mod StarkWars {
     use core::hash::{HashStateTrait};
     use core::num::traits::Pow;
     use core::poseidon::{HashState, PoseidonTrait};
-    use core::starknet::{ClassHash, ContractAddress, get_caller_address};
+    use core::starknet::{ClassHash, ContractAddress, get_caller_address, get_tx_info};
     use core::starknet::storage::{Map, Vec};
     use crate::character::Character;
     use crate::constants::{STAT_SUM, SEGMENTS, MAX_SCENARIOS, LIVES, MIN_STAT_VALUE, MAX_STAT_VALUE};
@@ -68,7 +68,7 @@ pub mod StarkWars {
     fn constructor(ref self: ContractState) {
         self.char_next_id.write(0);
         self.challenge_next_id.write(0);
-        self.ownable.initializer(owner: get_caller_address());
+        self.ownable.initializer(owner: get_tx_info().account_contract_address);
         let char_id = self.create_character("Default", array![4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3]);
         self.challanger.write(char_id);
         self.emit(Events::ChallengerUpdated { new_challenger: char_id });
@@ -190,9 +190,9 @@ pub mod StarkWars {
             }
         }
 
-        fn get_characters_of_address(self: @ContractState, address: ContractAddress) -> Array<(CharId, ByteArray, Array<u32>)> {
+        fn foo_get_my_characters(self: @ContractState, address: ContractAddress) -> Array<(CharId, ByteArray, Array<u32>)> {
             let char_ids = self.owner_to_character.entry(address);
-            let mut my_characters = array![];
+            let mut characters = array![];
             for i in 0..char_ids.len() {
                 let char_id = char_ids.at(i).read();
                 let name = self.characters.entry(char_id).name.read();
@@ -201,9 +201,9 @@ pub mod StarkWars {
                 for j in 0..self_stats.len() {
                     stats.append(self_stats.at(j).read());
                 };
-                my_characters.append((char_id, name, stats));
+                characters.append((char_id, name, stats));
             };
-            my_characters
+            characters
         }
 
         fn get_challenger(self: @ContractState) -> (CharId, ByteArray, Array<u32>){
