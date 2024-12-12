@@ -90,6 +90,14 @@ const characters = [
 export default function CharacterCarousel({onSelectCharacter}:{onSelectCharacter: (character: any) => void}) {
     const [selectedCharacter, setSelectedCharacter] = useState<number | null>(null)
     const { address } = useAccount();
+    const { data: rawOwner } =
+        useReadContract({
+            functionName: 'owner',
+            abi: ABI,
+            address: CONTRACT_ADDRESS,
+            args: [],
+        });
+    console.log("OWNER", rawOwner);
     const { data: rawCharacters } =
         useReadContract({
             functionName: 'foo_get_my_characters',
