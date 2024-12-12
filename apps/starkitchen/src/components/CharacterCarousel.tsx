@@ -105,6 +105,7 @@ export default function CharacterCarousel({onSelectCharacter}:{onSelectCharacter
             address: CONTRACT_ADDRESS,
             args: [address],
         });
+    console.log("get my characters output", rawCharacters);
 
     const myCharacters = (rawCharacters || []).map((object : any, index: number) => {
         return {
