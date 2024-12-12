@@ -119,7 +119,7 @@ pub mod StarkWars {
                 }
                 if lives1 == 0 || lives2 == 0 {
                     break;
-                }
+                }   
             };
             if lives1 > lives2 {
                 return char_id1;
