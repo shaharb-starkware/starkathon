@@ -100,16 +100,17 @@ export default function CharacterCarousel({onSelectCharacter}:{onSelectCharacter
 
     const { data: rawCharacters } =
         useReadContract({
-            functionName: 'foo_get_my_characters',
+            functionName: 'get_my_characters',
             abi: ABI,
             address: CONTRACT_ADDRESS,
-            args: [address],
+            args: [],
         });
     console.log("get my characters output", rawCharacters);
 
     const myCharacters = (rawCharacters || []).map((object : any, index: number) => {
         return {
             id: index,
+            char_id: object["0"],
             name: object["1"],
             image: "src/assets/default-avatar?height=200&width=150",
             stats: [

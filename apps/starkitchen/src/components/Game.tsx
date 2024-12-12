@@ -1,7 +1,9 @@
+import { ABI, CONTRACT_ADDRESS } from '@/utils/consts';
 import {WelcomeScreen} from "@/components/WelcomeScreen.tsx";
 import {useState} from "react";
 import CreateCharacterPage from "@/components/CreateCharacterScreen.tsx";
 import {ChallengeScreen} from "@/components/ChallengeScreen.tsx";
+import { useContract, useSendTransaction } from '@starknet-react/core';
 
 enum ScreenTypes {
     Welcome = 'welcome',
@@ -13,6 +15,12 @@ enum ScreenTypes {
 export const Game = () => {
     const [activeScreen, setActiveScreen] = useState(ScreenTypes.Welcome);
     const [selectedCharacter, setSelectedCharacter] = useState(null)
+    const { contract } = useContract({
+        abi: ABI,
+        address: CONTRACT_ADDRESS
+    });
+    const { sendAsync, error } = useSendTransaction({calls: []});
+
 
     const handleCreateCharacter = () => {
         // Implement character creation logic here
@@ -26,9 +34,10 @@ export const Game = () => {
         setActiveScreen(ScreenTypes.Welcome);
     }
 
-    const handleStartGame = () => {
+    const handleStartGame = async () => {
         // Implement character creation logic here
         console.log("Starting game...")
+        await sendAsync ([contract.populate("play", [selectedCharacter["char_id"]])]);
         setActiveScreen(ScreenTypes.Match);
     }
 

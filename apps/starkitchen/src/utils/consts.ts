@@ -7,12 +7,35 @@ export const SrcPrefix =
 
 /// The address of the deployed contract.
 export const CONTRACT_ADDRESS =
-  '0x03dbec3af8b08342f9e4d89a8299341e23c644538d06a73bae3a3fd943d5e0be';
+  '0x0682843b17ebd0a66f729c2c38177231a8414acad17dbe88b8a3401bb8bfc908';
 /// The ABI of the deployed contract. Can be found on starkscan.
 /// For the above contract, the ABI can be found at:
 /// https://sepolia.starkscan.co/contract/0x049c75609bb077a9427bc26a9935472ec75e5508ed216ef7f7ad2693397deebc
 /// And the ABI is accessible under the 'Class Code/History' tab -> 'Copy ABI Code' button.
 export const ABI = [
+  {
+    "name": "UpgradeableImpl",
+    "type": "impl",
+    "interface_name": "openzeppelin_upgrades::interface::IUpgradeable"
+  },
+  {
+    "name": "openzeppelin_upgrades::interface::IUpgradeable",
+    "type": "interface",
+    "items": [
+      {
+        "name": "upgrade",
+        "type": "function",
+        "inputs": [
+          {
+            "name": "new_class_hash",
+            "type": "core::starknet::class_hash::ClassHash"
+          }
+        ],
+        "outputs": [],
+        "state_mutability": "external"
+      }
+    ]
+  },
   {
     "name": "StarkWarsImpl",
     "type": "impl",
@@ -59,20 +82,6 @@ export const ABI = [
       {
         "name": "min_value2",
         "type": "core::integer::u32"
-      }
-    ]
-  },
-  {
-    "name": "core::option::Option::<(core::integer::u32, core::byte_array::ByteArray, core::array::Array::<core::integer::u32>)>",
-    "type": "enum",
-    "variants": [
-      {
-        "name": "Some",
-        "type": "(core::integer::u32, core::byte_array::ByteArray, core::array::Array::<core::integer::u32>)"
-      },
-      {
-        "name": "None",
-        "type": "()"
       }
     ]
   },
@@ -145,7 +154,7 @@ export const ABI = [
         "inputs": [],
         "outputs": [
           {
-            "type": "core::option::Option::<(core::integer::u32, core::byte_array::ByteArray, core::array::Array::<core::integer::u32>)>"
+            "type": "(core::integer::u32, core::byte_array::ByteArray, core::array::Array::<core::integer::u32>)"
           }
         ],
         "state_mutability": "view"
@@ -246,6 +255,30 @@ export const ABI = [
         "kind": "nested",
         "name": "OwnershipTransferStarted",
         "type": "openzeppelin_access::ownable::ownable::OwnableComponent::OwnershipTransferStarted"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "class_hash",
+        "type": "core::starknet::class_hash::ClassHash"
+      }
+    ]
+  },
+  {
+    "kind": "enum",
+    "name": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event",
+    "type": "event",
+    "variants": [
+      {
+        "kind": "nested",
+        "name": "Upgraded",
+        "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Upgraded"
       }
     ]
   },
@@ -374,6 +407,11 @@ export const ABI = [
         "kind": "nested",
         "name": "OwnableEvent",
         "type": "openzeppelin_access::ownable::ownable::OwnableComponent::Event"
+      },
+      {
+        "kind": "nested",
+        "name": "UpgradeableEvent",
+        "type": "openzeppelin_upgrades::upgradeable::UpgradeableComponent::Event"
       },
       {
         "kind": "nested",
