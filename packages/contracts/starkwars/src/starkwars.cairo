@@ -124,7 +124,7 @@ use core::hash::{HashStateTrait};
                 });
                 if lives1 == 0 || lives2 == 0 {
                     break;
-                }
+                }   
             };
             if lives1 > lives2 {
                 return char_id1;
@@ -184,6 +184,22 @@ use core::hash::{HashStateTrait};
 
         fn get_my_characters(self: @ContractState) -> Array<(CharId, ByteArray, Array<u32>)> {
             let caller_address = get_caller_address();
+            let char_ids = self.owner_to_character.entry(caller_address);
+            let mut characters = array![];
+            for i in 0..char_ids.len() {
+                let char_id = char_ids.at(i).read();
+                let name = self.characters.entry(char_id).name.read();
+                let mut stats = array![];
+                let self_stats = self.characters.entry(char_id).stats;
+                for j in 0..self_stats.len() {
+                    stats.append(self_stats.at(j).read());
+                };
+                characters.append((char_id, name, stats));
+            };
+            characters
+        }
+
+        fn foo_get_my_characters(self: @ContractState, caller_address: ContractAddress) -> Array<(CharId, ByteArray, Array<u32>)> {
             let char_ids = self.owner_to_character.entry(caller_address);
             let mut characters = array![];
             for i in 0..char_ids.len() {
