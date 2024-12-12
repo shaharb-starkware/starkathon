@@ -17,7 +17,7 @@ fn test_character_creation() {
     let cheat_address: ContractAddress = 0x123.try_into().unwrap();
     cheat_caller_address(contract_address,cheat_address, CheatSpan::Indefinite);
     dispatcher.create_character("Ariel", array![1,9,9,4,9,9,4]);
-    let characters = dispatcher.foo_get_my_characters(address: cheat_address);
+    let characters = dispatcher.get_characters_of_address(address: cheat_address);
     println!("characters: {}", characters.len());
     assert!(characters.len() == 1, "unexpected amount of characters");
     let (id, name, stats) = characters[0];

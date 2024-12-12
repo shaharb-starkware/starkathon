@@ -7,7 +7,7 @@ pub trait IStarkWars<TState> {
     fn create_character(ref self: TState, name: ByteArray, stats: Array<u32>) -> CharId;
     fn add_challenge(ref self: TState, challenge: Challenge) -> ChallengeId;
     fn play(ref self: TState, char_id: CharId);
-    fn foo_get_my_characters(self: @TState, address: ContractAddress) -> Array<(CharId, ByteArray, Array<u32>)>;
+    fn get_characters_of_address(self: @TState, address: ContractAddress) -> Array<(CharId, ByteArray, Array<u32>)>;
     fn get_challenger(self: @TState) -> (CharId, ByteArray, Array<u32>);
 }
 

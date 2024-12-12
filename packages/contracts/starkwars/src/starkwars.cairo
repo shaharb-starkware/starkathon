@@ -190,7 +190,7 @@ pub mod StarkWars {
             }
         }
 
-        fn foo_get_my_characters(self: @ContractState, address: ContractAddress) -> Array<(CharId, ByteArray, Array<u32>)> {
+        fn get_characters_of_address(self: @ContractState, address: ContractAddress) -> Array<(CharId, ByteArray, Array<u32>)> {
             let char_ids = self.owner_to_character.entry(address);
             let mut characters = array![];
             for i in 0..char_ids.len() {
