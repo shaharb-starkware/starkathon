@@ -41,10 +41,10 @@ export const ChallengesPictures = {
 export const CharactersPictures = {
     "Default": "src/assets/characters/default.jpg",
     "Putin": "src/assets/characters/putin.jpg",
-    "Trump": "src/assets/challenges/trump.jpg",
-    "Itay": "src/assets/challenges/itay.jpg",
-    "Super Chick": "src/assets/challenges/super_chick.jpg",
-    "Vitalik": "src/assets/challenges/vitalik.jpg",
-    "Glinda": "src/assets/challenges/glinda.jpg",
-    "Cleopatra": "src/assets/challenges/cleopatra.jpg",
+    "Trump": "src/assets/characters/trump.jpg",
+    "Itay": "src/assets/characters/itay.jpg",
+    "Super Chick": "src/assets/characters/super_chick.jpg",
+    "Vitalik": "src/assets/characters/vitalik.jpg",
+    "Glinda": "src/assets/characters/glinda.jpg",
+    "Cleopatra": "src/assets/characters/cleopatra.jpg",
 }

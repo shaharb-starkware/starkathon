@@ -18,10 +18,11 @@ interface CharacterCardProps {
     character: Character
     isSelected: boolean
     onSelect: () => void,
-    ringColor: string
+    ringColor: string,
+    img: string
 }
 
-export default function CharacterCard({ character, isSelected, onSelect, ringColor }: CharacterCardProps) {
+export default function CharacterCard({ character, isSelected, onSelect, ringColor, img }: CharacterCardProps) {
     return (
         <Card
             className={`cursor-pointer transition-all w-[280px] mx-auto ${isSelected ? `ring-8 ${ringColor}` : ''}`}
@@ -31,7 +32,7 @@ export default function CharacterCard({ character, isSelected, onSelect, ringCol
                 <h3 className="text-xl font-bold text-center mb-2">{character.name}</h3>
                 <div className="relative w-full h-48 mb-4">
                     <Image
-                        src={character.image}
+                        src={img}
                         alt={character.name}
                         className="rounded-md object-cover"
                         width={280}

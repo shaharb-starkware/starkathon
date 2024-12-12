@@ -15,11 +15,6 @@ enum ScreenTypes {
 export const Game = () => {
     const [activeScreen, setActiveScreen] = useState(ScreenTypes.Welcome);
     const [selectedCharacter, setSelectedCharacter] = useState(null)
-    const { contract } = useContract({
-        abi: ABI,
-        address: CONTRACT_ADDRESS
-    });
-    const { sendAsync, error } = useSendTransaction({calls: []});
 
 
     const handleCreateCharacter = () => {
@@ -37,7 +32,6 @@ export const Game = () => {
     const handleStartGame = async () => {
         // Implement character creation logic here
         console.log("Starting game...")
-        await sendAsync ([contract.populate("play", [selectedCharacter["char_id"]])]);
         setActiveScreen(ScreenTypes.Match);
     }
 

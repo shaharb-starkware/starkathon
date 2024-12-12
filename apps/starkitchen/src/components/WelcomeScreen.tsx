@@ -29,7 +29,7 @@ export const WelcomeScreen =  ({onStartGame, onCreateCharClick, onSelectChar, se
                     <CharacterCarousel onSelectCharacter={onSelectChar}/>
                 </div>
         < div className = "mt-8 flex flex-col items-center gap-6" >
-                    {rawChallenger?<h1 className="text-3xl font-bold text-white mb-8 text-center" > Current Champion: { rawChallenger["1"] } </h1>:null}
+                    {rawChallenger?<h1 className="text-3xl font-bold text-white mb-8 text-center" > Current Champion: Default </h1>:null}
                     <PlayButton isDisabled={!selectedChar} onClick={onStartGame}/>
                     <CreateButton onClick={onCreateCharClick}/>
                 </div>

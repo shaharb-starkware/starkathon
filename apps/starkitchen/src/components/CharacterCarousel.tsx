@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import CharacterCard from './CharacterCard'
 import { useAccount, useReadContract } from '@starknet-react/core';
+import {CharactersPictures} from "@/consts.ts";
 
 // Mock data for characters with stats
 const characters = [
@@ -151,6 +152,7 @@ export default function CharacterCarousel({onSelectCharacter}:{onSelectCharacter
                                 isSelected={selectedCharacter === character.id}
                                 onSelect={() => handleSelectCharacter(character)}
                                 ringColor="ring-yellow-500"
+                                img={CharactersPictures[character.name]}
                             />
                         </div>
                     </CarouselItem>
