@@ -15,7 +15,6 @@ export const WelcomeScreen =  ({onCreateCharClick, onSelectChar, selectedChar}: 
             address: CONTRACT_ADDRESS,
             args: [],
         });
-    console.log(rawChallenger)
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-900 to-blue-900 p-8">
@@ -28,7 +27,7 @@ export const WelcomeScreen =  ({onCreateCharClick, onSelectChar, selectedChar}: 
                     <CharacterCarousel onSelectCharacter={onSelectChar}/>
                 </div>
         < div className = "mt-8 flex flex-col items-center gap-6" >
-                    <h1 className="text-3xl font-bold text-white mb-8 text-center">Current Champion: </h1>
+                    {rawChallenger?<h1 className="text-3xl font-bold text-white mb-8 text-center" > Current Champion: { rawChallenger["Some"]["1"] } </h1>:null}
                     <PlayButton isDisabled={!selectedChar} />
                     <CreateButton onClick={onCreateCharClick}/>
                 </div>
