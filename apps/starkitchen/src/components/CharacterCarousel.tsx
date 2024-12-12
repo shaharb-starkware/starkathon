@@ -100,10 +100,10 @@ export default function CharacterCarousel({onSelectCharacter}:{onSelectCharacter
 
     const { data: rawCharacters } =
         useReadContract({
-            functionName: 'get_my_characters',
+            functionName: 'get_characters_of_address',
             abi: ABI,
             address: CONTRACT_ADDRESS,
-            args: [],
+            args: [address],
         });
     console.log("get my characters output", rawCharacters);
 
