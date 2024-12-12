@@ -2,7 +2,15 @@ node_modules
 .env
 .env.development
 .env.production
-packages/contracts/event_manager/target/
 .spr.yml
 packages/contracts/starkwars/target/
+.snfoundry_cache/.prev_tests_failed
 target/dev/starkwars_StarkWars.contract_class.json
+target/dev/starkwars_integrationtest_StarkWars.test.contract_class.json
+target/dev/starkwars_integrationtest.test.json
+target/dev/starkwars_integrationtest.test.sierra.json
+target/dev/starkwars_integrationtest.test.starknet_artifacts.json
+target/dev/starkwars_unittest_StarkWars.test.contract_class.json
+target/dev/starkwars_unittest.test.json
+target/dev/starkwars_unittest.test.sierra.json
+target/dev/starkwars_unittest.test.starknet_artifacts.json

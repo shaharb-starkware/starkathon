@@ -4,39 +4,58 @@ pub mod StarkWars {
     use core::hash::{HashStateTrait};
     use core::num::traits::Pow;
     use core::poseidon::{HashState, PoseidonTrait};
-    use core::starknet::{ContractAddress, get_caller_address};
+    use core::starknet::{ClassHash, ContractAddress, get_caller_address};
     use core::starknet::storage::{Map, Vec};
     use crate::character::Character;
     use crate::constants::{STAT_SUM, SEGMENTS, MAX_SCENARIOS, LIVES, MIN_STAT_VALUE, MAX_STAT_VALUE};
     use crate::challenge::Challenge;
-    use crate::types::{CharId, ChallengeId};
     use crate::interface::{IStarkWars, Events};
+    use crate::types::{CharId, ChallengeId};
+    use crate::utils::SpanExtTrait;
     use starknet::storage::{MutableVecTrait, StoragePathEntry, StoragePointerReadAccess, StoragePointerWriteAccess, VecTrait};
     use openzeppelin_access::ownable::OwnableComponent;
+    use openzeppelin_upgrades::interface::IUpgradeable;
+    use openzeppelin_upgrades::UpgradeableComponent;
 
     component!(path: OwnableComponent, storage: ownable, event: OwnableEvent);
+    component!(path: UpgradeableComponent, storage: upgradeable, event: UpgradeableEvent);
 
     #[abi(embed_v0)]
     impl OwnableImpl = OwnableComponent::OwnableImpl<ContractState>;
     impl OwnableInternalImpl = OwnableComponent::InternalImpl<ContractState>;
 
+    impl UpgradeableInternalImpl = UpgradeableComponent::InternalImpl<ContractState>;
+    
+    #[abi(embed_v0)]
+    impl UpgradeableImpl of IUpgradeable<ContractState> {
+        /// Upgrades the contract class hash to `new_class_hash`.
+        /// This may only be called by the contract owner.
+        fn upgrade(ref self: ContractState, new_class_hash: ClassHash) {
+            self.ownable.assert_only_owner();
+            self.upgradeable.upgrade(new_class_hash);
+        }
+    }
+
     #[storage]
     struct Storage {
-        challenges: Map<ChallengeId, Challenge>, // TODO consider change to Vec
+        challenges: Map<ChallengeId, Challenge>,
         characters: Map<CharId, Character>,
         character_to_owner: Map<CharId, ContractAddress>,
         owner_to_character: Map<ContractAddress, Vec<CharId>>,
-        challanger: Option<CharId>, // TODO remove option
+        challanger: CharId,
         char_next_id: CharId,
         challenge_next_id: ChallengeId,
         #[substorage(v0)]
         ownable: OwnableComponent::Storage,
+        #[substorage(v0)]
+        upgradeable: UpgradeableComponent::Storage,
     }
 
     #[event]
     #[derive(Drop, starknet::Event)]
     pub enum Event {
         OwnableEvent: OwnableComponent::Event,
+        UpgradeableEvent: UpgradeableComponent::Event,
         CharacterCreated: Events::CharacterCreated,
         ChallengeAdded: Events::ChallengeAdded,
         DuelStarted: Events::DuelStarted,
@@ -51,7 +70,7 @@ pub mod StarkWars {
         self.challenge_next_id.write(0);
         self.ownable.initializer(get_caller_address());
         let char_id = self.create_character("Default", array![4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 3]);
-        self.challanger.write(Option::Some(char_id));
+        self.challanger.write(char_id);
         self.emit(Events::ChallengerUpdated { new_challenger: char_id });
     }
 
@@ -64,17 +83,6 @@ pub mod StarkWars {
         assert!(sum == STAT_SUM, "sum of stat's values must be {}", STAT_SUM);
     }
 
-    fn contain(vec: Span<u64>, target: u64) -> bool {
-        let mut found = false;
-        for id in vec {
-            if *id == target {
-                found = true;
-                break;
-            };
-        };
-        found
-    }
-
     fn get_randomness(len: u64) -> Span<u64> {
         let mut random_indices = array![];
         let mut hash_state: HashState = PoseidonTrait::new();
@@ -83,7 +91,7 @@ pub mod StarkWars {
         for _ in 0..MAX_SCENARIOS {
             let next_random: u64 = (timestamp_hash % 2_u256.pow(SEGMENTS)).try_into().unwrap();
             let mut random_index = next_random % len;
-            while contain(random_indices.span(), random_index) {
+            while random_indices.span().contains(random_index) {
                 random_index += 1 % len;
             };
             random_indices.append(random_index);
@@ -169,23 +177,17 @@ pub mod StarkWars {
             if self.character_to_owner.entry(char_id).read() != get_caller_address() {
                 panic!("caller is not the owner of the character");
             }
-            let challenger = self.challanger.read();
-            if challenger.is_none() {
-                self.challanger.write(Option::Some(char_id));
-            } else {
-                let winner_char_id = self.duel(self.challanger.read().unwrap(), char_id);
-                self.emit(Events::DuelEnded { winner: winner_char_id });
-                if winner_char_id != 0 {
-                    self.challanger.write(Option::Some(winner_char_id));
-                    self.emit(Events::ChallengerUpdated { new_challenger: winner_char_id });
-                }
+            let winner_char_id = self.duel(self.challanger.read(), char_id);
+            self.emit(Events::DuelEnded { winner: winner_char_id });
+            if winner_char_id != 0 {
+                self.challanger.write(winner_char_id);
+                self.emit(Events::ChallengerUpdated { new_challenger: winner_char_id });
             }
         }
 
         fn get_my_characters(self: @ContractState) -> Array<(CharId, ByteArray, Array<u32>)> {
-            let caller_address = get_caller_address();
-            let char_ids = self.owner_to_character.entry(caller_address);
-            let mut characters = array![];
+            let char_ids = self.owner_to_character.entry(get_caller_address());
+            let mut my_characters = array![];
             for i in 0..char_ids.len() {
                 let char_id = char_ids.at(i).read();
                 let name = self.characters.entry(char_id).name.read();
@@ -194,25 +196,20 @@ pub mod StarkWars {
                 for j in 0..self_stats.len() {
                     stats.append(self_stats.at(j).read());
                 };
-                characters.append((char_id, name, stats));
+                my_characters.append((char_id, name, stats));
             };
-            characters
+            my_characters
         }
 
-        fn get_challenger(self: @ContractState) -> Option<(CharId, ByteArray, Array<u32>)> {
-            let challenger = self.challanger.read();
-            match challenger {
-                Option::Some(char_id) => {
-                    let name = self.characters.entry(char_id).name.read();
-                    let mut stats = array![];
-                    let self_stats = self.characters.entry(char_id).stats;
-                    for j in 0..self_stats.len() {
-                        stats.append(self_stats.at(j).read());
-                    };
-                    Option::Some((char_id, name, stats))
-                },
-                Option::None => Option::None,
-            }
+        fn get_challenger(self: @ContractState) -> (CharId, ByteArray, Array<u32>){
+            let char_id: u32= self.challanger.read();
+            let name = self.characters.entry(char_id).name.read();
+            let mut stats = array![];
+            let self_stats = self.characters.entry(char_id).stats;
+            for j in 0..self_stats.len() {
+                stats.append(self_stats.at(j).read());
+            };
+            (char_id, name, stats)
         }
     }
 }

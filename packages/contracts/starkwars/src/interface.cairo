@@ -7,7 +7,7 @@ pub trait IStarkWars<TState> {
     fn add_challenge(ref self: TState, challenge: Challenge) -> ChallengeId;
     fn play(ref self: TState, char_id: CharId);
     fn get_my_characters(self: @TState) -> Array<(CharId, ByteArray, Array<u32>)>;
-    fn get_challenger(self: @TState) -> Option<(CharId, ByteArray, Array<u32>)>;
+    fn get_challenger(self: @TState) -> (CharId, ByteArray, Array<u32>);
 }
 
 pub mod Events {
