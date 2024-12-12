@@ -1,6 +1,5 @@
 'use client'
 
-import { shortString } from "starknet";
 import { ABI, CONTRACT_ADDRESS } from '@/utils/consts';
 import { useState, useCallback } from 'react'
 import { useAccount, useContract, useSendTransaction } from '@starknet-react/core';
@@ -22,7 +21,7 @@ export default function CharacterCreationForm( {onSubmit}: {onSubmit: ()=>void})
         address: CONTRACT_ADDRESS
     });
     // const [formattedData, setFormattedData] = useState(undefined);
-    const { send, error } = useSendTransaction({calls: []});
+    const { sendAsync, error } = useSendTransaction({calls: []});
 
     const totalStats = Object.values(statValues).reduce((sum, value) => sum + value, 0)
 
@@ -54,12 +53,13 @@ export default function CharacterCreationForm( {onSubmit}: {onSubmit: ()=>void})
         }
     }, [])
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         // Here you would typically send the data to your backend
         const { name, stats } = formatCharacterData();
         if (contract && address) {
-            send ([contract.populate("create_character", [name, stats])]);
+            await sendAsync ([contract.populate("create_character", [name, stats])]);
+            onSubmit();
         }
         // Navigate back to the main page
     }
