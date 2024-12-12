@@ -7,7 +7,7 @@ export const SrcPrefix =
 
 /// The address of the deployed contract.
 export const CONTRACT_ADDRESS =
-  '0x04df1d8f4d0bbf1c02eb6e6cecb4f3a716af3d38d7a051cb23de48ad9a57ea2a';
+  '0x05b50c5374de067f9ce35f352a7ef167cc458078a0f59900da7fff1e29c91972';
 /// The ABI of the deployed contract. Can be found on starkscan.
 /// For the above contract, the ABI can be found at:
 /// https://sepolia.starkscan.co/contract/0x049c75609bb077a9427bc26a9935472ec75e5508ed216ef7f7ad2693397deebc
@@ -138,7 +138,7 @@ export const ABI = [
         "state_mutability": "external"
       },
       {
-        "name": "get_characters_of_address",
+        "name": "foo_get_my_characters",
         "type": "function",
         "inputs": [
           {

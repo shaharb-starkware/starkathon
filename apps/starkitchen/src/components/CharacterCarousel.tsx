@@ -90,6 +90,15 @@ const characters = [
 export default function CharacterCarousel({onSelectCharacter}:{onSelectCharacter: (character: any) => void}) {
     const [selectedCharacter, setSelectedCharacter] = useState<number | null>(null)
     const { address } = useAccount();
+    const { data: rawCharacters } =
+        useReadContract({
+            functionName: 'foo_get_my_characters',
+            abi: ABI,
+            address: CONTRACT_ADDRESS,
+            args: [address],
+        });
+    console.log("get my characters output", rawCharacters);
+
 
     const handleSelectCharacter = (character) => {
         setSelectedCharacter(character.id)
@@ -97,15 +106,6 @@ export default function CharacterCarousel({onSelectCharacter}:{onSelectCharacter
     }
 
 
-
-    const { data: rawCharacters } =
-        useReadContract({
-            functionName: 'get_characters_of_address',
-            abi: ABI,
-            address: CONTRACT_ADDRESS,
-            args: [address],
-        });
-    console.log("get my characters output", rawCharacters);
 
     const myCharacters = (rawCharacters || []).map((object : any, index: number) => {
         return {
