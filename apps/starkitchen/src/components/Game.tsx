@@ -1,6 +1,7 @@
 import {WelcomeScreen} from "@/components/WelcomeScreen.tsx";
 import {useState} from "react";
 import CreateCharacterPage from "@/components/CreateCharacterScreen.tsx";
+import {ChallengeScreen} from "@/components/ChallengScreen.tsx";
 
 enum ScreenTypes {
     Welcome = 'welcome',
@@ -25,11 +26,17 @@ export const Game = () => {
         setActiveScreen(ScreenTypes.Welcome);
     }
 
+    const handleStartGame = () => {
+        // Implement character creation logic here
+        console.log("Starting game...")
+        setActiveScreen(ScreenTypes.Match);
+    }
+
   return (
     <div className="min-h-screen w-screen bg-gray-100">
-        {activeScreen === ScreenTypes.Welcome ? <WelcomeScreen onCreateCharClick={handleCreateCharacter} onSelectChar={setSelectedCharacter} selectedChar={selectedCharacter}/> :
+        {activeScreen === ScreenTypes.Welcome ? <WelcomeScreen onStartGame={handleStartGame} onCreateCharClick={handleCreateCharacter} onSelectChar={setSelectedCharacter} selectedChar={selectedCharacter}/> :
             activeScreen === ScreenTypes.Create ? <CreateCharacterPage onReturn={handleReturnToMain}/> :
-            activeScreen === ScreenTypes.Match ? <div>Match Screen</div> : <div>Match Summary</div>}
+            activeScreen === ScreenTypes.Match ? <ChallengeScreen characters={[selectedCharacter, selectedCharacter]}/> : <div>Match Summary</div>}
 
     </div>
   );

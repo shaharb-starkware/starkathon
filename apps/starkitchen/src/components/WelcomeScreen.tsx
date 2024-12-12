@@ -6,7 +6,7 @@ import { useReadContract } from '@starknet-react/core';
 import { ABI, CONTRACT_ADDRESS } from '@/utils/consts';
 
 
-export const WelcomeScreen =  ({onCreateCharClick, onSelectChar, selectedChar}: {onCreateCharClick: ()=>void, onSelectChar: ()=> void, selectedChar: any}) => {
+export const WelcomeScreen =  ({onStartGame, onCreateCharClick, onSelectChar, selectedChar}: {onStartGame: () => void, onCreateCharClick: ()=>void, onSelectChar: ()=> void, selectedChar: any}) => {
 
     const { data: rawChallenger } =
         useReadContract({
@@ -28,7 +28,7 @@ export const WelcomeScreen =  ({onCreateCharClick, onSelectChar, selectedChar}: 
                 </div>
         < div className = "mt-8 flex flex-col items-center gap-6" >
                     {rawChallenger?<h1 className="text-3xl font-bold text-white mb-8 text-center" > Current Champion: { rawChallenger["Some"]["1"] } </h1>:null}
-                    <PlayButton isDisabled={!selectedChar} />
+                    <PlayButton isDisabled={!selectedChar} onClick={onStartGame}/>
                     <CreateButton onClick={onCreateCharClick}/>
                 </div>
             </main>

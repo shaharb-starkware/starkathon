@@ -141,6 +141,7 @@ export default function CharacterCarousel({onSelectCharacter}:{onSelectCharacter
                                 character={character}
                                 isSelected={selectedCharacter === character.id}
                                 onSelect={() => handleSelectCharacter(character)}
+                                ringColor="ring-yellow-500"
                             />
                         </div>
                     </CarouselItem>

@@ -17,13 +17,14 @@ interface Character {
 interface CharacterCardProps {
     character: Character
     isSelected: boolean
-    onSelect: () => void
+    onSelect: () => void,
+    ringColor: string
 }
 
-export default function CharacterCard({ character, isSelected, onSelect }: CharacterCardProps) {
+export default function CharacterCard({ character, isSelected, onSelect, ringColor }: CharacterCardProps) {
     return (
         <Card
-            className={`cursor-pointer transition-all w-[280px] mx-auto ${isSelected ? 'ring-8 ring-yellow-500' : ''}`}
+            className={`cursor-pointer transition-all w-[280px] mx-auto ${isSelected ? `ring-8 ${ringColor}` : ''}`}
             onClick={onSelect}
         >
             <CardContent className="p-4 flex flex-col">
