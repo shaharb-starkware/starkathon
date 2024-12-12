@@ -1,7 +1,7 @@
 #[starknet::contract]
 pub mod StarkWars {
     use starknet::event::EventEmitter;
-use core::hash::{HashStateTrait};
+    use core::hash::{HashStateTrait};
     use core::num::traits::Pow;
     use core::poseidon::{HashState, PoseidonTrait};
     use core::starknet::{ContractAddress, get_caller_address};
