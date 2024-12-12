@@ -2,7 +2,6 @@ node_modules
 .env
 .env.development
 .env.production
-packages/contracts/event_manager/target/
 .spr.yml
 packages/contracts/starkwars/target/
 target/dev/starkwars_StarkWars.contract_class.json
