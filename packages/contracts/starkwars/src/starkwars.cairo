@@ -190,8 +190,8 @@ pub mod StarkWars {
             }
         }
 
-        fn get_my_characters(self: @ContractState) -> Array<(CharId, ByteArray, Array<u32>)> {
-            let char_ids = self.owner_to_character.entry(get_caller_address());
+        fn get_characters_of_address(self: @ContractState, address: ContractAddress) -> Array<(CharId, ByteArray, Array<u32>)> {
+            let char_ids = self.owner_to_character.entry(address);
             let mut my_characters = array![];
             for i in 0..char_ids.len() {
                 let char_id = char_ids.at(i).read();
