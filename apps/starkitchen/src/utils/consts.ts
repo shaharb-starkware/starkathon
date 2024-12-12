@@ -7,7 +7,7 @@ export const SrcPrefix =
 
 /// The address of the deployed contract.
 export const CONTRACT_ADDRESS =
-  '0x03f6439d882e01df5a686725295cacbb824178b36a14dad9688b99464c6f2224';
+  '0x03dbec3af8b08342f9e4d89a8299341e23c644538d06a73bae3a3fd943d5e0be';
 /// The ABI of the deployed contract. Can be found on starkscan.
 /// For the above contract, the ABI can be found at:
 /// https://sepolia.starkscan.co/contract/0x049c75609bb077a9427bc26a9935472ec75e5508ed216ef7f7ad2693397deebc
@@ -16,7 +16,7 @@ export const ABI = [
   {
     "name": "StarkWarsImpl",
     "type": "impl",
-    "interface_name": "starkwars::starkwars::StarkWars::StarkWarsTrait"
+    "interface_name": "starkwars::interface::IStarkWars"
   },
   {
     "name": "core::byte_array::ByteArray",
@@ -37,7 +37,7 @@ export const ABI = [
     ]
   },
   {
-    "name": "starkwars::scenario::Scenario",
+    "name": "starkwars::challenge::Challenge",
     "type": "struct",
     "members": [
       {
@@ -77,7 +77,7 @@ export const ABI = [
     ]
   },
   {
-    "name": "starkwars::starkwars::StarkWars::StarkWarsTrait",
+    "name": "starkwars::interface::IStarkWars",
     "type": "interface",
     "items": [
       {
@@ -101,12 +101,12 @@ export const ABI = [
         "state_mutability": "external"
       },
       {
-        "name": "add_scenario",
+        "name": "add_challenge",
         "type": "function",
         "inputs": [
           {
-            "name": "scenario",
-            "type": "starkwars::scenario::Scenario"
+            "name": "challenge",
+            "type": "starkwars::challenge::Challenge"
           }
         ],
         "outputs": [
@@ -132,22 +132,6 @@ export const ABI = [
         "name": "get_my_characters",
         "type": "function",
         "inputs": [],
-        "outputs": [
-          {
-            "type": "core::array::Array::<(core::integer::u32, core::byte_array::ByteArray, core::array::Array::<core::integer::u32>)>"
-          }
-        ],
-        "state_mutability": "view"
-      },
-      {
-        "name": "foo_get_my_characters",
-        "type": "function",
-        "inputs": [
-          {
-            "name": "caller_address",
-            "type": "core::starknet::contract_address::ContractAddress"
-          }
-        ],
         "outputs": [
           {
             "type": "core::array::Array::<(core::integer::u32, core::byte_array::ByteArray, core::array::Array::<core::integer::u32>)>"
@@ -266,6 +250,122 @@ export const ABI = [
     ]
   },
   {
+    "kind": "struct",
+    "name": "starkwars::interface::Events::CharacterCreated",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "char_id",
+        "type": "core::integer::u32"
+      },
+      {
+        "kind": "data",
+        "name": "name",
+        "type": "core::byte_array::ByteArray"
+      },
+      {
+        "kind": "data",
+        "name": "stats",
+        "type": "core::array::Array::<core::integer::u32>"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "starkwars::interface::Events::ChallengeAdded",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "challenge_id",
+        "type": "core::integer::u32"
+      },
+      {
+        "kind": "data",
+        "name": "challenge",
+        "type": "starkwars::challenge::Challenge"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "starkwars::interface::Events::DuelStarted",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "char_id1",
+        "type": "core::integer::u32"
+      },
+      {
+        "kind": "data",
+        "name": "char_id2",
+        "type": "core::integer::u32"
+      }
+    ]
+  },
+  {
+    "name": "core::bool",
+    "type": "enum",
+    "variants": [
+      {
+        "name": "False",
+        "type": "()"
+      },
+      {
+        "name": "True",
+        "type": "()"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "starkwars::interface::Events::ChallengeAccepted",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "challenge_id",
+        "type": "core::integer::u32"
+      },
+      {
+        "kind": "data",
+        "name": "challenge",
+        "type": "starkwars::challenge::Challenge"
+      },
+      {
+        "kind": "data",
+        "name": "survivors",
+        "type": "(core::bool, core::bool)"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "starkwars::interface::Events::DuelEnded",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "winner",
+        "type": "core::integer::u32"
+      }
+    ]
+  },
+  {
+    "kind": "struct",
+    "name": "starkwars::interface::Events::ChallengerUpdated",
+    "type": "event",
+    "members": [
+      {
+        "kind": "data",
+        "name": "new_challenger",
+        "type": "core::integer::u32"
+      }
+    ]
+  },
+  {
     "kind": "enum",
     "name": "starkwars::starkwars::StarkWars::Event",
     "type": "event",
@@ -274,6 +374,36 @@ export const ABI = [
         "kind": "nested",
         "name": "OwnableEvent",
         "type": "openzeppelin_access::ownable::ownable::OwnableComponent::Event"
+      },
+      {
+        "kind": "nested",
+        "name": "CharacterCreated",
+        "type": "starkwars::interface::Events::CharacterCreated"
+      },
+      {
+        "kind": "nested",
+        "name": "ChallengeAdded",
+        "type": "starkwars::interface::Events::ChallengeAdded"
+      },
+      {
+        "kind": "nested",
+        "name": "DuelStarted",
+        "type": "starkwars::interface::Events::DuelStarted"
+      },
+      {
+        "kind": "nested",
+        "name": "ChallengeAccepted",
+        "type": "starkwars::interface::Events::ChallengeAccepted"
+      },
+      {
+        "kind": "nested",
+        "name": "DuelEnded",
+        "type": "starkwars::interface::Events::DuelEnded"
+      },
+      {
+        "kind": "nested",
+        "name": "ChallengerUpdated",
+        "type": "starkwars::interface::Events::ChallengerUpdated"
       }
     ]
   }

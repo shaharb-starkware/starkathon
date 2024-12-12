@@ -43,7 +43,7 @@ export default function CharacterCard({ character, isSelected, onSelect, ringCol
                         const Icon = Stats[stat.name].icon
                         return (<div key={index} className="flex flex-col items-center">
                             <div className="flex gap-1">
-                                <Icon />
+                                <Icon/>
                                 <span className="font-semibold">{stat.name}</span>
                             </div>
                             <span>{stat.value}</span>
